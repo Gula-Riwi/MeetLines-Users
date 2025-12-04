@@ -58,7 +58,7 @@ build/
 ### VS Code ###
 .vscode/
 .mvn/wrapper/maven-wrapper.properties
-src/main/resources/application.properties
+
 
 docs/architecture.md
 docs/bots.md
