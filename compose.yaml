@@ -3,9 +3,9 @@ services:
     image: postgres:15
     container_name: keycloak_db
     environment:
-      POSTGRES_DB: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: emYqpMHL+p2nv1i0QOI8uTlt3m7CaQaz
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env file}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -21,11 +21,11 @@ services:
       KC_DB: postgres
       KC_DB_URL_HOST: postgres
       KC_DB_URL_PORT: 5432
-      KC_DB_URL_DATABASE: postgres
-      KC_DB_USERNAME: postgres
-      KC_DB_PASSWORD: emYqpMHL+p2nv1i0QOI8uTlt3m7CaQaz
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB_URL_DATABASE: ${POSTGRES_DB:-postgres}
+      KC_DB_USERNAME: ${POSTGRES_USER:-postgres}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env file}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?KEYCLOAK_ADMIN_PASSWORD must be set in .env file}
     ports:
       - "8080:8080"
     depends_on:

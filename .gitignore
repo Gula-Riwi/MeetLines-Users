@@ -60,6 +60,9 @@ build/
 .mvn/wrapper/maven-wrapper.properties
 src/main/resources/application.properties
 
+### Environment Variables ###
+.env
+
 docs/architecture.md
 docs/bots.md
 docs/flow.md
