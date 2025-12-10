@@ -67,3 +67,6 @@ docs/index.md
 docs/quickstart.md
 docs/README.md
 docs/vps_documentation.md
+AUTH_GUIDE.md
+compose.yaml
+IMPLEMENTATION_SUMMARY.md
