@@ -37,7 +37,7 @@ public class UserSyncFilter extends OncePerRequestFilter {
                 userSyncService.syncUserFromJwt(jwt);
                 log.debug("User synced successfully for request: {}", request.getRequestURI());
             } catch (Exception e) {
-                log.warn("Failed to sync user: {}", e.getMessage());
+                log.warn("Failed to sync user", e);
                 // Don't fail the request if sync fails, just log it
             }
         }
