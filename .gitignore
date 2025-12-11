@@ -75,3 +75,6 @@ docs/vps_documentation.md
 AUTH_GUIDE.md
 compose.yaml
 IMPLEMENTATION_SUMMARY.md
+query-users.ps1
+sync-test.ps1
+test-user-sync.ps1
