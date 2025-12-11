@@ -166,4 +166,12 @@ public class JpaAppointmentRepository implements AppointmentRepository {
                 return springDataRepository.countByProjectIdAndStatus(projectId, status);
         }
 
+        @Override
+        public List<Appointment> findByProjectIdAndDate(UUID projectId, java.time.LocalDate date) {
+                return springDataRepository.findByProjectIdAndDate(projectId, date)
+                                .stream()
+                                .map(AppointmentEntity::toDomain)
+                                .collect(Collectors.toList());
+        }
+
 }
