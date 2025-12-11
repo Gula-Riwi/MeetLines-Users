@@ -10,6 +10,9 @@
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
+### Environment Variables ###
+.env
+
 # Package Files #
 *.jar
 *.war
@@ -58,7 +61,7 @@ build/
 ### VS Code ###
 .vscode/
 .mvn/wrapper/maven-wrapper.properties
-src/main/resources/application.properties
+
 
 docs/architecture.md
 docs/bots.md
@@ -67,3 +70,9 @@ docs/index.md
 docs/quickstart.md
 docs/README.md
 docs/vps_documentation.md
+AUTH_GUIDE.md
+compose.yaml
+IMPLEMENTATION_SUMMARY.md
+query-users.ps1
+sync-test.ps1
+test-user-sync.ps1
