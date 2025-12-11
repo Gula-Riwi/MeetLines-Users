@@ -61,9 +61,7 @@ build/
 ### VS Code ###
 .vscode/
 .mvn/wrapper/maven-wrapper.properties
-src/main/resources/application.properties
-src/main/resources/application-oauth.properties
-src/main/resources/application-dev.properties
+
 
 docs/architecture.md
 docs/bots.md
