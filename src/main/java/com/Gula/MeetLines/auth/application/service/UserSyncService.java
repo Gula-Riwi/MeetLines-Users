@@ -59,23 +59,30 @@ public class UserSyncService {
         if (existingUser.isPresent()) {
             AppUser user = existingUser.get();
             // Update email and name if they changed
-            if (!user.getEmail().equals(email)) {
+            if (email != null && !email.equals(user.getEmail())) {
                 user.setEmail(email);
             }
-            if (!user.getFullName().equals(name)) {
+            if (name != null && !name.equals(user.getFullName())) {
                 user.setFullName(name);
             }
             return appUserRepository.save(user);
         }
         
         // Create new user
+        String displayName = name;
+        if (displayName == null || displayName.isBlank()) {
+            displayName = (email != null && email.contains("@")) 
+                ? email.substring(0, email.indexOf("@")) 
+                : "User";
+        }
+        
         AppUser newUser = AppUser.builder()
                 .id(UUID.fromString(keycloakUserId))
                 .email(email)
-                .fullName(name != null ? name : email.split("@")[0])
+                .fullName(displayName)
                 .authProvider("keycloak")
                 .externalProviderId(keycloakUserId)
-                .isEmailVerified(true)  // Keycloak has already verified the email
+                .emailVerified(true)  // Keycloak has already verified the email
                 .build();
         
         AppUser savedUser = appUserRepository.save(newUser);
