@@ -4,15 +4,18 @@ FROM maven:3.9-eclipse-temurin-17-alpine AS builder
 
 WORKDIR /app
 
-# Copy pom files
+# Copy parent pom first
 COPY pom.xml ./
-COPY auth/pom.xml ./auth/
 
-# Copy source code
+# Copy both module poms (required for parent pom to resolve)
+COPY auth/pom.xml ./auth/
+COPY booking/pom.xml ./booking/
+
+# Copy auth source code
 COPY auth/src ./auth/src/
 
-# Download dependencies and build
-RUN mvn clean package -DskipTests -pl auth -B
+# Build only the auth module
+RUN mvn clean package -DskipTests -Dmaven.test.skip=true -pl auth -am -B
 
 # Stage 2: Runtime
 FROM eclipse-temurin:17-jre-alpine
