@@ -82,6 +82,3 @@ test-user-sync.ps1
 MIGRATION_SUMMARY.md
 meetlines-realm.json
 meetlines-realm-simple.json
-VPS_DEPLOYMENT_GUIDE.md
-build-log.txt
-test-user-sync.ps1

@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  meetlines-users:
-    image: ghcr.io/gula-riwi/meetlines-users:latest
-    container_name: meetlines-users
+  meetlines-auth:
+    image: ghcr.io/gula-riwi/meetlines-users-auth:latest
+    container_name: meetlines-auth
     restart: unless-stopped
     ports:
       - "8081:8081"
@@ -38,7 +38,48 @@ services:
       start_period: 40s
     
     labels:
-      - "com.meetlines.service=users"
+      - "com.meetlines.service=auth"
+      - "com.meetlines.environment=production"
+
+  meetlines-booking:
+    image: ghcr.io/gula-riwi/meetlines-users-booking:latest
+    container_name: meetlines-booking
+    restart: unless-stopped
+    ports:
+      - "8082:8082"
+    environment:
+      # Database Configuration
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_NAME: ${DB_NAME}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      
+      # Keycloak OAuth2 Configuration
+      KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
+      KEYCLOAK_JWK_SET_URI: ${KEYCLOAK_JWK_SET_URI}
+      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
+      
+      # Spring Configuration
+      SPRING_PROFILES_ACTIVE: prod
+      SERVER_PORT: 8082
+      
+      # JVM Options
+      JAVA_OPTS: "-Xmx512m -Xms256m"
+    
+    networks:
+      - meetlines-agent
+    
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8082/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    labels:
+      - "com.meetlines.service=booking"
       - "com.meetlines.environment=production"
 
 networks:

@@ -7,15 +7,19 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME_PREFIX: ${{ github.repository }}
 
 jobs:
   build-and-push:
-    name: Build Docker Image
+    name: Build and Push Docker Images
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
+    
+    strategy:
+      matrix:
+        module: [auth, booking]
 
     steps:
       - name: Checkout code
@@ -31,25 +35,26 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata
+      - name: Extract metadata for ${{ matrix.module }}
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-${{ matrix.module }}
           tags: |
             type=ref,event=branch
             type=sha,prefix={{branch}}-
             type=raw,value=latest,enable={{is_default_branch}}
 
-      - name: Build and push Docker image
+      - name: Build and push ${{ matrix.module }} Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: ./${{ matrix.module }}/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=${{ matrix.module }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.module }}
 
   deploy:
     name: Deploy to VPS
@@ -93,8 +98,9 @@ jobs:
             # Login to GitHub Container Registry
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             
-            # Pull latest image
-            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            # Pull latest images
+            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-auth:latest
+            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-booking:latest
             
             # Stop and remove old containers
             docker-compose down || true
