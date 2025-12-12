@@ -2,6 +2,7 @@
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 */target/
 **/target/
 !auth/target/*.jar
@@ -16,6 +17,11 @@ target/
 =======
 target/
 !target/*.jar
+>>>>>>> Stashed changes
+=======
+*/target/
+**/target/
+!auth/target/*.jar
 >>>>>>> Stashed changes
 
 # IDE files
