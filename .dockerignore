@@ -1,8 +1,18 @@
 # Build artifacts
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
 */target/
 **/target/
 !auth/target/*.jar
+=======
+target/
+!target/*.jar
+>>>>>>> Stashed changes
+=======
+target/
+!target/*.jar
+>>>>>>> Stashed changes
 =======
 target/
 !target/*.jar
