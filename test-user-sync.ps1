@@ -6,7 +6,7 @@
 $KEYCLOAK_URL = "http://localhost:8080"
 $REALM = "meetlines"
 $CLIENT_ID = "meetlines-backend"
-$CLIENT_SECRET = "VG88v8kzshAte09I3zUtJUxgX9jkY5eN"
+$CLIENT_SECRET = "RYn5gzho4U57QMfuICcZQj6jUgRKJuYe"
 $USERNAME = "tomas123"
 $PASSWORD = "tom123"
 $APP_URL = "http://localhost:8081"
