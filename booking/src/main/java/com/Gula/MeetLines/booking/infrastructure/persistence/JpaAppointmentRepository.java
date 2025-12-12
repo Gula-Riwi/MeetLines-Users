@@ -116,7 +116,8 @@ public class JpaAppointmentRepository implements AppointmentRepository {
 
         @Override
         public List<Appointment> findPendingAppointmentsToStart(ZonedDateTime currentTime) {
-                return springDataRepository.findPendingAppointmentsToStart(currentTime)
+                return springDataRepository.findByStatusAndStartTimeLessThanEqualOrderByStartTimeAsc(
+                                                AppointmentStatus.PENDING, currentTime)
                                 .stream()
                                 .map(AppointmentEntity::toDomain)
                                 .collect(Collectors.toList());
@@ -124,7 +125,8 @@ public class JpaAppointmentRepository implements AppointmentRepository {
 
         @Override
         public List<Appointment> findInProgressAppointmentsToComplete(ZonedDateTime currentTime) {
-                return springDataRepository.findInProgressAppointmentsToComplete(currentTime)
+                return springDataRepository.findByStatusAndEndTimeLessThanEqualOrderByEndTimeAsc(
+                                                AppointmentStatus.IN_PROGRESS, currentTime)
                                 .stream()
                                 .map(AppointmentEntity::toDomain)
                                 .collect(Collectors.toList());
@@ -149,6 +151,21 @@ public class JpaAppointmentRepository implements AppointmentRepository {
                         Long excludeId) {
                 List<AppointmentEntity> conflicts = springDataRepository.findConflictingAppointments(
                                 projectId,
+                                startTime,
+                                endTime,
+                                excludeId);
+
+                return conflicts.isEmpty();
+        }
+
+        @Override
+        public boolean isEmployeeAvailable(
+                        UUID employeeId,
+                        ZonedDateTime startTime,
+                        ZonedDateTime endTime,
+                        Long excludeId) {
+                List<AppointmentEntity> conflicts = springDataRepository.findConflictingAppointmentsForEmployee(
+                                employeeId,
                                 startTime,
                                 endTime,
                                 excludeId);
