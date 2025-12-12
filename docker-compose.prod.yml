@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  meetlines-users:
-    image: ghcr.io/gula-riwi/meetlines-users:latest
-    container_name: meetlines-users
+  meetlines-auth:
+    image: ghcr.io/gula-riwi/meetlines-auth:latest
+    container_name: meetlines-auth
     restart: unless-stopped
     ports:
       - "8081:8081"
@@ -38,7 +38,7 @@ services:
       start_period: 40s
     
     labels:
-      - "com.meetlines.service=users"
+      - "com.meetlines.service=auth"
       - "com.meetlines.environment=production"
 
 networks:
