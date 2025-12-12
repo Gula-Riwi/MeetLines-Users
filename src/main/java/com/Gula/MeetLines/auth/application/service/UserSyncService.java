@@ -43,6 +43,14 @@ public class UserSyncService {
         String email = jwt.getClaimAsString("email");
         String name = jwt.getClaimAsString("name");
         
+        // Validate required fields
+        if (keycloakUserId == null || keycloakUserId.isBlank()) {
+            throw new IllegalArgumentException("JWT 'sub' claim (user ID) is required");
+        }
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("JWT 'email' claim is required");
+        }
+        
         log.info("Syncing user from Keycloak - ID: {}, Email: {}", keycloakUserId, email);
         
         // Try to find existing user by external provider ID
