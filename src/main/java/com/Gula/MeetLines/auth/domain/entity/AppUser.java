@@ -38,11 +38,11 @@ public class AppUser {
     @Column(length = 50)
     private String phone;
     
-    @Column(columnDefinition = "boolean default false")
-    private Boolean isEmailVerified;
+    @Column(name = "is_email_verified", columnDefinition = "boolean default false")
+    private Boolean emailVerified;
     
-    @Column(columnDefinition = "boolean default false")
-    private Boolean isPhoneVerified;
+    @Column(name = "is_phone_verified", columnDefinition = "boolean default false")
+    private Boolean phoneVerified;
     
     @Column(length = 50)
     private String authProvider;
@@ -64,11 +64,11 @@ public class AppUser {
         if (updatedAt == null) {
             updatedAt = LocalDateTime.now();
         }
-        if (isEmailVerified == null) {
-            isEmailVerified = false;
+        if (emailVerified == null) {
+            emailVerified = false;
         }
-        if (isPhoneVerified == null) {
-            isPhoneVerified = false;
+        if (phoneVerified == null) {
+            phoneVerified = false;
         }
         if (authProvider == null) {
             authProvider = "keycloak";
