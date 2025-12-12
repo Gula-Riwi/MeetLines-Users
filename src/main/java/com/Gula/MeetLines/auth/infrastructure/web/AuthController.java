@@ -39,7 +39,7 @@ public class AuthController {
             response.put("fullName", user.getFullName());
             response.put("phone", user.getPhone());
             response.put("authProvider", user.getAuthProvider());
-            response.put("isEmailVerified", user.getIsEmailVerified());
+            response.put("isEmailVerified", user.getEmailVerified());
             response.put("createdAt", user.getCreatedAt());
             
             return ResponseEntity.ok(response);
