@@ -1,7 +1,12 @@
 # Build artifacts
+<<<<<<< Updated upstream
 */target/
 **/target/
 !auth/target/*.jar
+=======
+target/
+!target/*.jar
+>>>>>>> Stashed changes
 
 # IDE files
 .idea/
