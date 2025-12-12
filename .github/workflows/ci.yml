@@ -11,6 +11,14 @@ jobs:
     name: Build and Test
     runs-on: ubuntu-latest
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+=======
+0
+>>>>>>> Stashed changes
+=======
+0
+>>>>>>> Stashed changes
 =======
 0
 >>>>>>> Stashed changes
@@ -45,7 +53,15 @@ jobs:
         with:
           name: Maven Test Results
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
           path: auth/target/surefire-reports/*.xml
+=======
+          path: target/surefire-reports/*.xml
+>>>>>>> Stashed changes
+=======
+          path: target/surefire-reports/*.xml
+>>>>>>> Stashed changes
 =======
           path: target/surefire-reports/*.xml
 >>>>>>> Stashed changes
@@ -59,8 +75,18 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
           name: meetlines-auth-jar
           path: auth/target/*.jar
+=======
+          name: meetlines-users-jar
+          path: target/*.jar
+>>>>>>> Stashed changes
+=======
+          name: meetlines-users-jar
+          path: target/*.jar
+>>>>>>> Stashed changes
 =======
           name: meetlines-users-jar
           path: target/*.jar
@@ -75,7 +101,15 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
           files: auth/target/site/jacoco/jacoco.xml
+=======
+          files: target/site/jacoco/jacoco.xml
+>>>>>>> Stashed changes
+=======
+          files: target/site/jacoco/jacoco.xml
+>>>>>>> Stashed changes
 =======
           files: target/site/jacoco/jacoco.xml
 >>>>>>> Stashed changes
