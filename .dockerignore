@@ -1,6 +1,7 @@
 # Build artifacts
-target/
-!target/*.jar
+*/target/
+**/target/
+!auth/target/*.jar
 
 # IDE files
 .idea/
