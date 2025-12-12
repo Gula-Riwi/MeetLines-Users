@@ -10,6 +10,10 @@ jobs:
   build:
     name: Build and Test
     runs-on: ubuntu-latest
+<<<<<<< Updated upstream
+=======
+0
+>>>>>>> Stashed changes
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -40,7 +44,11 @@ jobs:
         uses: dorny/test-reporter@v1
         with:
           name: Maven Test Results
+<<<<<<< Updated upstream
           path: auth/target/surefire-reports/*.xml
+=======
+          path: target/surefire-reports/*.xml
+>>>>>>> Stashed changes
           reporter: java-junit
           fail-on-error: false
 
@@ -50,8 +58,13 @@ jobs:
       - name: Upload JAR artifact
         uses: actions/upload-artifact@v4
         with:
+<<<<<<< Updated upstream
           name: meetlines-auth-jar
           path: auth/target/*.jar
+=======
+          name: meetlines-users-jar
+          path: target/*.jar
+>>>>>>> Stashed changes
           retention-days: 7
 
       - name: Run code coverage
@@ -61,5 +74,9 @@ jobs:
         if: github.event_name == 'push'
         uses: codecov/codecov-action@v4
         with:
+<<<<<<< Updated upstream
           files: auth/target/site/jacoco/jacoco.xml
+=======
+          files: target/site/jacoco/jacoco.xml
+>>>>>>> Stashed changes
           fail_ci_if_error: false
