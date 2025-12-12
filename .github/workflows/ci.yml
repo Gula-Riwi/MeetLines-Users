@@ -8,11 +8,12 @@ on:
 
 jobs:
   build:
-    name: Build and Test
+    name: Build and Test Multi-Module Project
     runs-on: ubuntu-latest
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
 0
 >>>>>>> Stashed changes
@@ -21,6 +22,13 @@ jobs:
 >>>>>>> Stashed changes
 =======
 0
+>>>>>>> Stashed changes
+=======
+    
+    strategy:
+      matrix:
+        module: [auth, booking]
+    
 >>>>>>> Stashed changes
     steps:
       - name: Checkout code
@@ -41,16 +49,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Build with Maven
-        run: ./mvnw clean compile -B
+      - name: Build ${{ matrix.module }} module
+        run: ./mvnw clean compile -pl ${{ matrix.module }} -B
 
-      - name: Run tests
-        run: ./mvnw test -B
+      - name: Run ${{ matrix.module }} tests
+        run: ./mvnw test -pl ${{ matrix.module }} -B
 
-      - name: Generate test report
+      - name: Generate test report for ${{ matrix.module }}
         if: always()
         uses: dorny/test-reporter@v1
         with:
+<<<<<<< Updated upstream
           name: Maven Test Results
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
@@ -65,15 +74,20 @@ jobs:
 =======
           path: target/surefire-reports/*.xml
 >>>>>>> Stashed changes
+=======
+          name: ${{ matrix.module }} Test Results
+          path: ${{ matrix.module }}/target/surefire-reports/*.xml
+>>>>>>> Stashed changes
           reporter: java-junit
           fail-on-error: false
 
-      - name: Package application
-        run: ./mvnw package -DskipTests -B
+      - name: Package ${{ matrix.module }} application
+        run: ./mvnw package -DskipTests -pl ${{ matrix.module }} -B
 
-      - name: Upload JAR artifact
+      - name: Upload ${{ matrix.module }} JAR artifact
         uses: actions/upload-artifact@v4
         with:
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
@@ -91,15 +105,20 @@ jobs:
           name: meetlines-users-jar
           path: target/*.jar
 >>>>>>> Stashed changes
+=======
+          name: meetlines-${{ matrix.module }}-jar
+          path: ${{ matrix.module }}/target/*.jar
+>>>>>>> Stashed changes
           retention-days: 7
 
-      - name: Run code coverage
-        run: ./mvnw verify -B
+      - name: Run code coverage for ${{ matrix.module }}
+        run: ./mvnw verify -pl ${{ matrix.module }} -B
 
       - name: Upload coverage to Codecov (optional)
         if: github.event_name == 'push'
         uses: codecov/codecov-action@v4
         with:
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
@@ -112,5 +131,8 @@ jobs:
 >>>>>>> Stashed changes
 =======
           files: target/site/jacoco/jacoco.xml
+>>>>>>> Stashed changes
+=======
+          files: auth/target/site/jacoco/jacoco.xml
 >>>>>>> Stashed changes
           fail_ci_if_error: false
