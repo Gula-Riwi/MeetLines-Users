@@ -68,46 +68,47 @@ public interface SpringDataAppointmentRepository extends JpaRepository<Appointme
          * Finds PENDING appointments that should start (start_time <= currentTime).
          * 
          * <p>
-         * Custom query to find appointments ready to transition to IN_PROGRESS.
+         * Spring Data JPA query method derivation:
          * </p>
+         * <pre>
+         * SELECT * FROM appointments 
+         * WHERE status = 'PENDING' 
+         * AND start_time <= ?
+         * ORDER BY start_time ASC
+         * </pre>
          * 
          * @param currentTime Current time
          * @return List of pending appointments to start
          */
-        @Query("""
-                        SELECT a FROM AppointmentEntity a
-                        WHERE a.status = 'PENDING'
-                        AND a.startTime <= :currentTime
-                        ORDER BY a.startTime ASC
-                        """)
-        List<AppointmentEntity> findPendingAppointmentsToStart(
-                        @Param("currentTime") ZonedDateTime currentTime);
+        List<AppointmentEntity> findByStatusAndStartTimeLessThanEqualOrderByStartTimeAsc(
+                        AppointmentStatus status, ZonedDateTime currentTime);
 
         /**
-         * Finds IN_PROGRESS appointments that should complete (end_time <=
-         * currentTime).
+         * Finds IN_PROGRESS appointments that should complete (end_time <= currentTime).
          * 
          * <p>
-         * Custom query to find appointments ready to transition to COMPLETED.
+         * Spring Data JPA query method derivation:
          * </p>
+         * <pre>
+         * SELECT * FROM appointments 
+         * WHERE status = 'IN_PROGRESS' 
+         * AND end_time <= ?
+         * ORDER BY end_time ASC
+         * </pre>
          * 
          * @param currentTime Current time
          * @return List of in-progress appointments to complete
          */
-        @Query("""
-                        SELECT a FROM AppointmentEntity a
-                        WHERE a.status = 'IN_PROGRESS'
-                        AND a.endTime <= :currentTime
-                        ORDER BY a.endTime ASC
-                        """)
-        List<AppointmentEntity> findInProgressAppointmentsToComplete(
-                        @Param("currentTime") ZonedDateTime currentTime);
+        List<AppointmentEntity> findByStatusAndEndTimeLessThanEqualOrderByEndTimeAsc(
+                        AppointmentStatus status, ZonedDateTime currentTime);
 
         /**
          * Finds appointments within a date range for a project.
          * 
          * <p>
-         * Used for calendar views and availability checks.
+         * ⚠️ Why @Query? Spring Data derived method would be too verbose:
+         * findByProjectIdAndStartTimeGreaterThanEqualAndEndTimeLessThanEqualOrderByStartTimeAsc
+         * @Query provides better readability and explicit control.
          * </p>
          * 
          * @param projectId Project identifier
@@ -131,16 +132,20 @@ public interface SpringDataAppointmentRepository extends JpaRepository<Appointme
          * Finds appointments that conflict with a given time slot.
          * 
          * <p>
+         * ⚠️ Why @Query? OBLIGATORIO - Spring Data NO puede derivar:
+         * </p>
+         * <ul>
+         * <li>Lógica de overlapping: (start < endTime) AND (end > startTime)</li>
+         * <li>Condiciones OR con IS NULL: (:excludeId IS NULL OR a.id != :excludeId)</li>
+         * <li>IN clause con múltiples estados</li>
+         * </ul>
+         * 
+         * <p>
          * Two appointments conflict if they overlap in time:
          * </p>
-         * 
          * <pre>
          * (requestedStart &lt; existingEnd) AND (requestedEnd &gt; existingStart)
          * </pre>
-         * 
-         * <p>
-         * Only considers active appointments (PENDING or IN_PROGRESS).
-         * </p>
          * 
          * @param projectId Project identifier
          * @param startTime Requested start time
@@ -163,6 +168,35 @@ public interface SpringDataAppointmentRepository extends JpaRepository<Appointme
                         @Param("excludeId") Long excludeId);
 
         /**
+         * Finds appointments for an employee that conflict with a given time slot.
+         * 
+         * <p>
+         * Used to check if an employee is available for a specific time slot.
+         * Only considers active appointments (PENDING or IN_PROGRESS).
+         * </p>
+         * 
+         * @param employeeId Employee identifier
+         * @param startTime  Requested start time
+         * @param endTime    Requested end time
+         * @param excludeId  Appointment ID to exclude (for rescheduling), can be null
+         * @return List of conflicting appointments for this employee (empty if no
+         *         conflicts)
+         */
+        @Query("""
+                        SELECT a FROM AppointmentEntity a
+                        WHERE a.employeeId = :employeeId
+                        AND a.status IN ('PENDING', 'IN_PROGRESS')
+                        AND a.startTime < :endTime
+                        AND a.endTime > :startTime
+                        AND (:excludeId IS NULL OR a.id != :excludeId)
+                        """)
+        List<AppointmentEntity> findConflictingAppointmentsForEmployee(
+                        @Param("employeeId") UUID employeeId,
+                        @Param("startTime") ZonedDateTime startTime,
+                        @Param("endTime") ZonedDateTime endTime,
+                        @Param("excludeId") Long excludeId);
+
+        /**
          * Counts appointments by project and status.
          * 
          * <p>
@@ -180,8 +214,12 @@ public interface SpringDataAppointmentRepository extends JpaRepository<Appointme
          * Finds appointments for a project on a specific date.
          * 
          * <p>
-         * Used to check which slots are already booked on a given day.
+         * ⚠️ Why @Query? OBLIGATORIO - Requires SQL function:
          * </p>
+         * <ul>
+         * <li>CAST(startTime AS date) - Spring Data cannot derive this</li>
+         * <li>IN clause with multiple statuses</li>
+         * </ul>
          * 
          * @param projectId Project identifier
          * @param date      The date to search

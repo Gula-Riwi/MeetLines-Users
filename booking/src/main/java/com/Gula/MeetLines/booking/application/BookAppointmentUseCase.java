@@ -124,7 +124,7 @@ public class BookAppointmentUseCase {
      */
     @Transactional
     public Appointment execute(BookAppointmentCommand command) {
-        // Step 1: Check availability
+        // Step 1: Check availability at PROJECT level (global)
         boolean isAvailable = appointmentRepository.isTimeSlotAvailable(
                 command.projectId(),
                 command.startTime(),
@@ -135,12 +135,31 @@ public class BookAppointmentUseCase {
         if (!isAvailable) {
             throw new TimeSlotNotAvailableException(
                     String.format(
-                            "Time slot from %s to %s is already booked",
+                            "Time slot from %s to %s is already booked for this project",
                             command.startTime(),
                             command.endTime()));
         }
 
-        // Step 2: Create appointment (domain validates business rules)
+        // Step 2: Check availability at EMPLOYEE level (if employee is specified)
+        if (command.employeeId() != null) {
+            boolean isEmployeeAvailable = appointmentRepository.isEmployeeAvailable(
+                    command.employeeId(),
+                    command.startTime(),
+                    command.endTime(),
+                    null // null because this is a new appointment
+            );
+
+            if (!isEmployeeAvailable) {
+                throw new EmployeeNotAvailableException(
+                        String.format(
+                                "Employee %s is not available from %s to %s - already has an appointment",
+                                command.employeeId(),
+                                command.startTime(),
+                                command.endTime()));
+            }
+        }
+
+        // Step 3: Create appointment (domain validates business rules)
         Appointment appointment = Appointment.create(
                 command.projectId(),
                 command.userId(),
@@ -152,14 +171,14 @@ public class BookAppointmentUseCase {
                 command.currencySnapshot(),
                 command.userNotes());
 
-        // Step 3: Save to database
+        // Step 4: Save to database
         Appointment savedAppointment = appointmentRepository.save(appointment);
 
-        // Step 4: Publish domain event (triggers n8n notification)
+        // Step 5: Publish domain event (triggers n8n notification)
         AppointmentBookedEvent event = AppointmentBookedEvent.from(savedAppointment);
         eventPublisher.publishEvent(event);
 
-        // Step 5: Return the created appointment
+        // Step 6: Return the created appointment
         return savedAppointment;
     }
 
@@ -269,6 +288,15 @@ public class BookAppointmentUseCase {
      */
     public static class TimeSlotNotAvailableException extends RuntimeException {
         public TimeSlotNotAvailableException(String message) {
+            super(message);
+        }
+    }
+
+    /**
+     * Exception thrown when an employee is not available for the requested time slot.
+     */
+    public static class EmployeeNotAvailableException extends RuntimeException {
+        public EmployeeNotAvailableException(String message) {
             super(message);
         }
     }

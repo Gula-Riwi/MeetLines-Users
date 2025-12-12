@@ -3,11 +3,14 @@ package com.Gula.MeetLines.booking.infrastructure.api;
 import com.Gula.MeetLines.booking.application.BookAppointmentUseCase;
 import com.Gula.MeetLines.booking.application.BookAppointmentUseCase.BookAppointmentCommand;
 import com.Gula.MeetLines.booking.application.BookAppointmentUseCase.TimeSlotNotAvailableException;
+import com.Gula.MeetLines.booking.application.BookAppointmentUseCase.EmployeeNotAvailableException;
 import com.Gula.MeetLines.booking.application.CancelAppointmentUseCase;
 import com.Gula.MeetLines.booking.application.CancelAppointmentUseCase.CancelAppointmentCommand;
 import com.Gula.MeetLines.booking.application.GetAppointmentUseCase;
 import com.Gula.MeetLines.booking.application.GetAppointmentUseCase.AppointmentNotFoundException;
 import com.Gula.MeetLines.booking.application.GetAvailableSlotsUseCase;
+import com.Gula.MeetLines.booking.application.GetProjectWorkingHoursUseCase;
+import com.Gula.MeetLines.booking.application.GetProjectWorkingHoursUseCase.WorkingHoursInfo;
 import com.Gula.MeetLines.booking.application.ListAppointmentsUseCase;
 import com.Gula.MeetLines.booking.domain.Appointment;
 import com.Gula.MeetLines.booking.domain.AppointmentStatus;
@@ -16,6 +19,7 @@ import com.Gula.MeetLines.booking.infrastructure.api.dto.CancelAppointmentReques
 import com.Gula.MeetLines.booking.infrastructure.api.dto.AppointmentResponse;
 import com.Gula.MeetLines.booking.infrastructure.api.dto.AvailableSlotsResponse;
 import com.Gula.MeetLines.booking.infrastructure.api.dto.ErrorResponse;
+import com.Gula.MeetLines.booking.infrastructure.api.dto.WorkingHoursResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -77,6 +81,7 @@ public class AppointmentController {
         private final GetAppointmentUseCase getAppointmentUseCase;
         private final ListAppointmentsUseCase listAppointmentsUseCase;
         private final GetAvailableSlotsUseCase getAvailableSlotsUseCase;
+        private final GetProjectWorkingHoursUseCase getProjectWorkingHoursUseCase;
 
         /**
          * Books a new appointment.
@@ -282,7 +287,67 @@ public class AppointmentController {
                 return ResponseEntity.ok(response);
         }
 
+        /**Gets working hours for a project on a specific date.
+         * 
+         * <p>
+         * <strong>Endpoint:</strong> GET /api/v1/appointments/projects/{projectId}/working-hours?date=2025-12-12
+         * </p>
+         * 
+         * <p>
+         * Returns the business hours (opening/closing times) for the project on a specific date.
+         * Useful for displaying business hours to users before they select appointment times.
+         * </p>
+         * 
+         * <p>
+         * <strong>Response examples:</strong>
+         * </p>
+         * 
+         * <pre>
+         * // Business is open
+         * {
+         *   "date": "2025-12-12",
+         *   "openingTime": "09:00:00",
+         *   "closingTime": "18:00:00",
+         *   "isOpen": true
+         * }
+         * 
+         * // Business is closed (weekend, holiday, etc.)
+         * {
+         *   "date": "2025-12-14",
+         *   "openingTime": null,
+         *   "closingTime": null,
+         *   "isOpen": false
+         * }
+         * </pre>
+         * 
+         * @param projectId Project identifier
+         * @param date      The date to check (format: yyyy-MM-dd)
+         * @return Working hours information
+         */
+        @GetMapping("/projects/{projectId}/working-hours")
+        public ResponseEntity<WorkingHoursResponse> getProjectWorkingHours(
+                        @PathVariable UUID projectId,
+                        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
+                log.info("Getting working hours for project {} on date {}", projectId, date);
+
+                WorkingHoursInfo info = getProjectWorkingHoursUseCase.execute(projectId, date);
+
+                WorkingHoursResponse response;
+                if (info.isOpen()) {
+                        response = WorkingHoursResponse.open(
+                                        date.toString(),
+                                        info.getOpeningTime(),
+                                        info.getClosingTime());
+                } else {
+                        response = WorkingHoursResponse.closed(date.toString());
+                }
+
+                return ResponseEntity.ok(response);
+        }
+
         /**
+         * 
          * Exception handler for TimeSlotNotAvailableException.
          * 
          * <p>
@@ -337,6 +402,30 @@ public class AppointmentController {
 
                 return ResponseEntity
                                 .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                                .body(error);
+        }
+
+        /**
+         * Exception handler for EmployeeNotAvailableException.
+         * 
+         * <p>
+         * Returns 409 Conflict when the employee is not available for the requested time slot.
+         * </p>
+         * 
+         * @param ex The exception
+         * @return ResponseEntity with error details
+         */
+        @ExceptionHandler(EmployeeNotAvailableException.class)
+        public ResponseEntity<ErrorResponse> handleEmployeeNotAvailable(
+                        EmployeeNotAvailableException ex) {
+                log.warn("Employee not available: {}", ex.getMessage());
+
+                ErrorResponse error = new ErrorResponse(
+                                "EMPLOYEE_NOT_AVAILABLE",
+                                ex.getMessage());
+
+                return ResponseEntity
+                                .status(HttpStatus.CONFLICT)
                                 .body(error);
         }
 
