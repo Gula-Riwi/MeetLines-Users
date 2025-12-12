@@ -97,6 +97,39 @@ services:
 =======
 >>>>>>> Stashed changes
 
+  meetlines-booking:
+    build:
+      context: .
+      dockerfile: ./booking/Dockerfile
+    container_name: meetlines-booking
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev,oauth
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/postgres
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env file}
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/meetlines
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/meetlines/protocol/openid-connect/certs
+      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
+      SERVER_PORT: 8082
+    depends_on:
+      - postgres
+      - keycloak
+    networks:
+      - keycloak_network
+    mem_limit: 768m
+    memswap_limit: 1536m
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 768M
+        reservations:
+          cpus: '0.5'
+          memory: 384M
+
 networks:
   keycloak_network:
     driver: bridge
