@@ -1,3 +1,87 @@
-auth/target
+# Compiled class file
+*.class
+
+# Log file
+*.log
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+### Environment Variables ###
+.env
+
+# Package Files #
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+replay_pid*
+
+### Maven ###
+HELP.md
+*/target/
+**/target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
 .vscode/
+.mvn/wrapper/maven-wrapper.properties
+
+
+docs/architecture.md
+docs/bots.md
+docs/flow.md
+docs/index.md
+docs/quickstart.md
+docs/README.md
+docs/vps_documentation.md
+AUTH_GUIDE.md
+compose.yaml
+IMPLEMENTATION_SUMMARY.md
+query-users.ps1
+sync-test.ps1
+test-user-sync.ps1
 CI_CD_SETUP.md
+test-user-sync.ps1
+MIGRATION_SUMMARY.md
+meetlines-realm.json
+meetlines-realm-simple.json
+VPS_DEPLOYMENT_GUIDE.md
+build-log.txt
+test-user-sync.ps1
