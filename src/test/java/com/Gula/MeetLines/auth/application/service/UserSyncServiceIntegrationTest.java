@@ -116,7 +116,7 @@ class UserSyncServiceIntegrationTest {
         Optional<AppUser> updatedUser = appUserRepository.findById(userId);
         assertThat(updatedUser).isPresent();
         assertThat(updatedUser.get().getFullName()).isEqualTo("Updated Name");
-        assertThat(updatedUser.get().isEmailVerified()).isTrue();
+        assertThat(updatedUser.get().getEmailVerified()).isTrue();
     }
 
     @Test
