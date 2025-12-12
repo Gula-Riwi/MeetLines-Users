@@ -288,4 +288,18 @@ public interface AppointmentRepository {
          * @return List of appointments on that date
          */
         List<Appointment> findByProjectIdAndDate(UUID projectId, java.time.LocalDate date);
+
+        /**
+         * Finds all appointments for a specific employee on a specific date.
+         * 
+         * <p>
+         * <strong>Use case:</strong> Check which time slots are already booked
+         * for a specific employee on a given day to calculate their availability.
+         * </p>
+         * 
+         * @param employeeId The employee identifier
+         * @param date       The date to search for
+         * @return List of appointments for that employee on that date
+         */
+        List<Appointment> findByEmployeeIdAndDate(UUID employeeId, java.time.LocalDate date);
 }

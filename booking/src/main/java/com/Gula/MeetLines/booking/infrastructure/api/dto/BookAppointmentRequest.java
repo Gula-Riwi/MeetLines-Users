@@ -33,19 +33,21 @@ import java.util.UUID;
  * @param userNotes Optional notes from the user
  */
 public record BookAppointmentRequest(
-        @NotNull(message = "Project ID is required") UUID projectId,
+                @NotNull(message = "Project ID is required") UUID projectId,
 
-        @NotNull(message = "User ID is required") UUID userId,
+                @NotNull(message = "User ID is required") UUID userId,
 
-        @NotNull(message = "Service ID is required") @Positive(message = "Service ID must be positive") Integer serviceId,
+                @NotNull(message = "Service ID is required") @Positive(message = "Service ID must be positive") Integer serviceId,
 
-        @NotNull(message = "Start time is required") @Future(message = "Start time must be in the future") ZonedDateTime startTime,
+                UUID employeeId,
 
-        @NotNull(message = "End time is required") @Future(message = "End time must be in the future") ZonedDateTime endTime,
+                @NotNull(message = "Start time is required") @Future(message = "Start time must be in the future") ZonedDateTime startTime,
 
-        @NotNull(message = "Price is required") @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0") BigDecimal price,
+                @NotNull(message = "End time is required") @Future(message = "End time must be in the future") ZonedDateTime endTime,
 
-        @NotNull(message = "Currency is required") @Size(min = 3, max = 3, message = "Currency must be a 3-letter code (e.g., COP, USD)") String currency,
+                @NotNull(message = "Price is required") @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0") BigDecimal price,
 
-        @Size(max = 1000, message = "User notes cannot exceed 1000 characters") String userNotes) {
+                @NotNull(message = "Currency is required") @Size(min = 3, max = 3, message = "Currency must be a 3-letter code (e.g., COP, USD)") String currency,
+
+                @Size(max = 1000, message = "User notes cannot exceed 1000 characters") String userNotes) {
 }

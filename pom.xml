@@ -50,9 +50,7 @@
 		</dependencies>
 	</dependencyManagement>
 	
-	
 	<dependencies>
-<<<<<<< Updated upstream
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jdbc</artifactId>
@@ -69,8 +67,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
@@ -83,7 +80,7 @@
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-core</artifactId>
 		</dependency>
-=======
+
 	<dependency>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
@@ -106,12 +103,12 @@
 		<artifactId>postgresql</artifactId>
 		<scope>runtime</scope>
 	</dependency>
->>>>>>> Stashed changes
+
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-database-postgresql</artifactId>
 		</dependency>
-=======
+
 	<dependency>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
@@ -128,7 +125,6 @@
 		<groupId>org.flywaydb</groupId>
 		<artifactId>flyway-database-postgresql</artifactId>
 	</dependency>
->>>>>>> Stashed changes
 
 	<dependency>
 		<groupId>org.postgresql</groupId>
@@ -145,8 +141,7 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
+
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-test</artifactId>
@@ -172,9 +167,7 @@
 			<version>1.19.3</version>
 			<scope>test</scope>
 		</dependency>
-=======
-=======
->>>>>>> Stashed changes
+
 	<dependency>
 		<groupId>org.springframework.security</groupId>
 		<artifactId>spring-security-test</artifactId>
@@ -200,13 +193,8 @@
 		<version>1.19.3</version>
 		<scope>test</scope>
 	</dependency>
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
+
 		<!-- Common dependencies for all modules can go here -->
->>>>>>> Stashed changes
 	</dependencies>
 
 	<build>

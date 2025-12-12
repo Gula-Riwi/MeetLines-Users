@@ -146,6 +146,7 @@ public class AppointmentController {
                                 request.projectId(),
                                 request.userId(),
                                 request.serviceId(),
+                                request.employeeId(),
                                 request.startTime(),
                                 request.endTime(),
                                 request.price(),
@@ -245,25 +246,37 @@ public class AppointmentController {
         }
 
         /**
-         * Gets available time slots for a project on a specific date.
+         * Gets available time slots for a specific employee on a specific date.
          * 
          * <p>
          * <strong>Endpoint:</strong> GET
-         * /api/v1/projects/{projectId}/available-slots?date=2025-12-15
+         * /api/v1/appointments/employees/{employeeId}/available-slots?projectId={projectId}&date=2025-12-15
          * </p>
          * 
-         * @param projectId The project identifier
-         * @param date      The date to check availability (format: yyyy-MM-dd)
-         * @return List of available time slots
+         * <p>
+         * This endpoint calculates availability at the EMPLOYEE level:
+         * </p>
+         * <ul>
+         * <li>Uses project-level schedule configuration (business hours)</li>
+         * <li>Filters out slots where the specific employee already has
+         * appointments</li>
+         * <li>Allows multiple employees to have appointments at the same time</li>
+         * </ul>
+         * 
+         * @param employeeId Employee identifier
+         * @param projectId  Project identifier (to get schedule configuration)
+         * @param date       The date to check availability (format: yyyy-MM-dd)
+         * @return List of available time slots for this employee
          */
-        @GetMapping("/projects/{projectId}/available-slots")
-        public ResponseEntity<AvailableSlotsResponse> getAvailableSlots(
-                        @PathVariable UUID projectId,
+        @GetMapping("/employees/{employeeId}/available-slots")
+        public ResponseEntity<AvailableSlotsResponse> getEmployeeAvailableSlots(
+                        @PathVariable UUID employeeId,
+                        @RequestParam UUID projectId,
                         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
 
-                log.info("Getting available slots for project {} on date {}", projectId, date);
+                log.info("Getting available slots for employee {} on date {}", employeeId, date);
 
-                List<TimeSlot> availableSlots = getAvailableSlotsUseCase.execute(projectId, date);
+                List<TimeSlot> availableSlots = getAvailableSlotsUseCase.execute(projectId, employeeId, date);
                 AvailableSlotsResponse response = AvailableSlotsResponse.from(date, availableSlots);
 
                 return ResponseEntity.ok(response);

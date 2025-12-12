@@ -12,8 +12,6 @@ services:
       - "5432:5432"
     networks:
       - keycloak_network
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
     mem_limit: 512m
     memswap_limit: 1024m
     deploy:
@@ -24,10 +22,6 @@ services:
         reservations:
           cpus: '0.5'
           memory: 256M
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 
   keycloak:
     image: quay.io/keycloak/keycloak:24.0.1
@@ -48,8 +42,6 @@ services:
       - postgres
     networks:
       - keycloak_network
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
     mem_limit: 1024m
     memswap_limit: 2048m
     deploy:
@@ -92,10 +84,7 @@ services:
         reservations:
           cpus: '0.5'
           memory: 384M
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
+
 
   meetlines-booking:
     build:

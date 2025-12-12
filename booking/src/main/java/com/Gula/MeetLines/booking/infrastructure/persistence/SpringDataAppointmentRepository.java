@@ -197,4 +197,26 @@ public interface SpringDataAppointmentRepository extends JpaRepository<Appointme
         List<AppointmentEntity> findByProjectIdAndDate(
                         @Param("projectId") UUID projectId,
                         @Param("date") java.time.LocalDate date);
+
+        /**
+         * Finds appointments for a specific employee on a specific date.
+         * 
+         * <p>
+         * Used to check which slots are already booked for an employee on a given day.
+         * </p>
+         * 
+         * @param employeeId Employee identifier
+         * @param date       The date to search
+         * @return List of appointments for that employee on that date
+         */
+        @Query("""
+                        SELECT a FROM AppointmentEntity a
+                        WHERE a.employeeId = :employeeId
+                        AND CAST(a.startTime AS date) = :date
+                        AND a.status IN ('PENDING', 'IN_PROGRESS')
+                        ORDER BY a.startTime ASC
+                        """)
+        List<AppointmentEntity> findByEmployeeIdAndDate(
+                        @Param("employeeId") UUID employeeId,
+                        @Param("date") java.time.LocalDate date);
 }

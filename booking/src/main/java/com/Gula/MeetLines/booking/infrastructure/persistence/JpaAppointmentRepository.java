@@ -174,4 +174,12 @@ public class JpaAppointmentRepository implements AppointmentRepository {
                                 .collect(Collectors.toList());
         }
 
+        @Override
+        public List<Appointment> findByEmployeeIdAndDate(UUID employeeId, java.time.LocalDate date) {
+                return springDataRepository.findByEmployeeIdAndDate(employeeId, date)
+                                .stream()
+                                .map(AppointmentEntity::toDomain)
+                                .collect(Collectors.toList());
+        }
+
 }

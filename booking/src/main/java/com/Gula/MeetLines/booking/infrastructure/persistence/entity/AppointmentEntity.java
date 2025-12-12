@@ -114,6 +114,15 @@ public class AppointmentEntity {
     private Integer serviceId;
 
     /**
+     * Employee identifier who will handle this appointment.
+     * Maps to: employee_id UUID NULL
+     * 
+     * Nullable for backward compatibility with existing appointments.
+     */
+    @Column(name = "employee_id", nullable = true)
+    private UUID employeeId;
+
+    /**
      * Appointment start time with timezone.
      * Maps to: start_time TIMESTAMP WITH TIME ZONE NOT NULL
      */
@@ -237,6 +246,7 @@ public class AppointmentEntity {
                 this.projectId,
                 this.appUserId,
                 this.serviceId,
+                this.employeeId,
                 this.startTime,
                 this.endTime,
                 this.status,
@@ -273,6 +283,7 @@ public class AppointmentEntity {
         entity.setProjectId(appointment.getProjectId());
         entity.setAppUserId(appointment.getAppUserId());
         entity.setServiceId(appointment.getServiceId());
+        entity.setEmployeeId(appointment.getEmployeeId());
         entity.setStartTime(appointment.getStartTime());
         entity.setEndTime(appointment.getEndTime());
         entity.setStatus(appointment.getStatus());

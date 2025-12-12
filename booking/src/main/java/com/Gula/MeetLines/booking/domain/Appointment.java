@@ -78,6 +78,13 @@ public class Appointment {
     private Integer serviceId;
 
     /**
+     * Identifier of the employee who will handle this appointment.
+     * References the employees table. Nullable for backward compatibility with
+     * existing appointments.
+     */
+    private UUID employeeId;
+
+    /**
      * Start date and time of the appointment (with timezone).
      * Using ZonedDateTime is crucial for handling different timezones correctly.
      */
@@ -150,6 +157,7 @@ public class Appointment {
      * @param projectId        Project identifier
      * @param appUserId        User identifier who books the appointment
      * @param serviceId        Service identifier
+     * @param employeeId       Employee identifier (can be null)
      * @param startTime        Start time
      * @param endTime          End time
      * @param priceSnapshot    Service price at the moment of booking
@@ -162,6 +170,7 @@ public class Appointment {
             UUID projectId,
             UUID appUserId,
             Integer serviceId,
+            UUID employeeId,
             ZonedDateTime startTime,
             ZonedDateTime endTime,
             BigDecimal priceSnapshot,
@@ -178,6 +187,7 @@ public class Appointment {
                 projectId,
                 appUserId,
                 serviceId,
+                employeeId,
                 startTime,
                 endTime,
                 AppointmentStatus.PENDING, // Initial status is always PENDING

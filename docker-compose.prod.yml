@@ -1,27 +1,14 @@
 version: '3.8'
 
 services:
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
   meetlines-auth:
     image: ghcr.io/gula-riwi/meetlines-auth:latest
     container_name: meetlines-auth
-=======
+
   meetlines-users:
     image: ghcr.io/gula-riwi/meetlines-users:latest
     container_name: meetlines-users
->>>>>>> Stashed changes
-=======
-  meetlines-users:
-    image: ghcr.io/gula-riwi/meetlines-users:latest
-    container_name: meetlines-users
->>>>>>> Stashed changes
-=======
-  meetlines-users:
-    image: ghcr.io/gula-riwi/meetlines-users:latest
-    container_name: meetlines-users
->>>>>>> Stashed changes
+
     restart: unless-stopped
     ports:
       - "8081:8081"
@@ -56,19 +43,11 @@ services:
       start_period: 40s
     
     labels:
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
+
       - "com.meetlines.service=auth"
-=======
+
       - "com.meetlines.service=users"
->>>>>>> Stashed changes
-=======
-      - "com.meetlines.service=users"
->>>>>>> Stashed changes
-=======
-      - "com.meetlines.service=users"
->>>>>>> Stashed changes
+
       - "com.meetlines.environment=production"
 
 networks:

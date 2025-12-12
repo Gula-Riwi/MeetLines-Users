@@ -145,10 +145,11 @@ public class BookAppointmentUseCase {
                 command.projectId(),
                 command.userId(),
                 command.serviceId(),
+                command.employeeId(),
                 command.startTime(),
                 command.endTime(),
-                command.price(),
-                command.currency(),
+                command.priceSnapshot(),
+                command.currencySnapshot(),
                 command.userNotes());
 
         // Step 3: Save to database
@@ -178,34 +179,32 @@ public class BookAppointmentUseCase {
      * <li>Built-in equals/hashCode/toString</li>
      * <li>Clear intent: this is just data, no behavior</li>
      * </ul>
+     * Command to book an appointment.
      * 
      * <p>
-     * <strong>Why not use Appointment directly?</strong>
+     * This is a <strong>Command</strong> pattern (CQRS), representing the intent
+     * to book an appointment. It's immutable and contains all the data needed.
      * </p>
-     * <ul>
-     * <li>Separation of concerns: API layer uses DTOs, domain uses entities</li>
-     * <li>Flexibility: Command can have different fields than Appointment</li>
-     * <li>Validation: Can add validation annotations here without polluting
-     * domain</li>
-     * </ul>
      * 
-     * @param projectId Project/business identifier
-     * @param userId    User who is booking the appointment
-     * @param serviceId Service being booked
-     * @param startTime Appointment start time
-     * @param endTime   Appointment end time
-     * @param price     Price of the service at booking time
-     * @param currency  Currency code (e.g., "COP", "USD")
-     * @param userNotes Optional notes from the user
+     * @param projectId        Project identifier
+     * @param userId           User identifier
+     * @param serviceId        Service identifier
+     * @param employeeId       Employee identifier (optional)
+     * @param startTime        Start time
+     * @param endTime          End time
+     * @param priceSnapshot    Price at booking time
+     * @param currencySnapshot Currency code
+     * @param userNotes        User notes (optional)
      */
     public record BookAppointmentCommand(
             UUID projectId,
             UUID userId,
             Integer serviceId,
+            UUID employeeId,
             ZonedDateTime startTime,
             ZonedDateTime endTime,
-            BigDecimal price,
-            String currency,
+            BigDecimal priceSnapshot,
+            String currencySnapshot,
             String userNotes) {
         /**
          * Compact constructor for validation.
@@ -236,10 +235,10 @@ public class BookAppointmentUseCase {
             if (endTime == null) {
                 throw new IllegalArgumentException("End time is required");
             }
-            if (price == null) {
+            if (priceSnapshot == null) {
                 throw new IllegalArgumentException("Price is required");
             }
-            if (currency == null || currency.isBlank()) {
+            if (currencySnapshot == null || currencySnapshot.isBlank()) {
                 throw new IllegalArgumentException("Currency is required");
             }
         }
