@@ -116,7 +116,8 @@ public class JpaAppointmentRepository implements AppointmentRepository {
 
         @Override
         public List<Appointment> findPendingAppointmentsToStart(ZonedDateTime currentTime) {
-                return springDataRepository.findPendingAppointmentsToStart(currentTime)
+                return springDataRepository.findByStatusAndStartTimeLessThanEqualOrderByStartTimeAsc(
+                                                AppointmentStatus.PENDING, currentTime)
                                 .stream()
                                 .map(AppointmentEntity::toDomain)
                                 .collect(Collectors.toList());
@@ -124,7 +125,8 @@ public class JpaAppointmentRepository implements AppointmentRepository {
 
         @Override
         public List<Appointment> findInProgressAppointmentsToComplete(ZonedDateTime currentTime) {
-                return springDataRepository.findInProgressAppointmentsToComplete(currentTime)
+                return springDataRepository.findByStatusAndEndTimeLessThanEqualOrderByEndTimeAsc(
+                                                AppointmentStatus.IN_PROGRESS, currentTime)
                                 .stream()
                                 .map(AppointmentEntity::toDomain)
                                 .collect(Collectors.toList());
@@ -157,6 +159,21 @@ public class JpaAppointmentRepository implements AppointmentRepository {
         }
 
         @Override
+        public boolean isEmployeeAvailable(
+                        UUID employeeId,
+                        ZonedDateTime startTime,
+                        ZonedDateTime endTime,
+                        Long excludeId) {
+                List<AppointmentEntity> conflicts = springDataRepository.findConflictingAppointmentsForEmployee(
+                                employeeId,
+                                startTime,
+                                endTime,
+                                excludeId);
+
+                return conflicts.isEmpty();
+        }
+
+        @Override
         public void deleteById(Long id) {
                 springDataRepository.deleteById(id);
         }
@@ -169,6 +186,14 @@ public class JpaAppointmentRepository implements AppointmentRepository {
         @Override
         public List<Appointment> findByProjectIdAndDate(UUID projectId, java.time.LocalDate date) {
                 return springDataRepository.findByProjectIdAndDate(projectId, date)
+                                .stream()
+                                .map(AppointmentEntity::toDomain)
+                                .collect(Collectors.toList());
+        }
+
+        @Override
+        public List<Appointment> findByEmployeeIdAndDate(UUID employeeId, java.time.LocalDate date) {
+                return springDataRepository.findByEmployeeIdAndDate(employeeId, date)
                                 .stream()
                                 .map(AppointmentEntity::toDomain)
                                 .collect(Collectors.toList());

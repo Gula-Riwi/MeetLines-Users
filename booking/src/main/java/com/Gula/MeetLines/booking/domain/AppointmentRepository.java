@@ -236,6 +236,32 @@ public interface AppointmentRepository {
                         Long excludeId);
 
         /**
+         * Checks if an employee is available for a specific time slot.
+         * 
+         * <p>
+         * An employee is available if they have NO active appointments
+         * (PENDING or IN_PROGRESS) that overlap with the requested time.
+         * </p>
+         * 
+         * <p>
+         * <strong>Use case:</strong> Before creating an appointment for an employee,
+         * check if they are available to prevent double-booking the same employee.
+         * </p>
+         * 
+         * @param employeeId The employee identifier
+         * @param startTime  Requested start time
+         * @param endTime    Requested end time
+         * @param excludeId  Appointment ID to exclude (for rescheduling), null for new
+         *                   appointments
+         * @return true if the employee is available, false if they have a conflict
+         */
+        boolean isEmployeeAvailable(
+                        UUID employeeId,
+                        ZonedDateTime startTime,
+                        ZonedDateTime endTime,
+                        Long excludeId);
+
+        /**
          * Deletes an appointment by ID.
          * 
          * <p>
@@ -288,4 +314,18 @@ public interface AppointmentRepository {
          * @return List of appointments on that date
          */
         List<Appointment> findByProjectIdAndDate(UUID projectId, java.time.LocalDate date);
+
+        /**
+         * Finds all appointments for a specific employee on a specific date.
+         * 
+         * <p>
+         * <strong>Use case:</strong> Check which time slots are already booked
+         * for a specific employee on a given day to calculate their availability.
+         * </p>
+         * 
+         * @param employeeId The employee identifier
+         * @param date       The date to search for
+         * @return List of appointments for that employee on that date
+         */
+        List<Appointment> findByEmployeeIdAndDate(UUID employeeId, java.time.LocalDate date);
 }

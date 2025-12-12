@@ -124,7 +124,7 @@ public class BookAppointmentUseCase {
      */
     @Transactional
     public Appointment execute(BookAppointmentCommand command) {
-        // Step 1: Check availability
+        // Step 1: Check availability at PROJECT level (global)
         boolean isAvailable = appointmentRepository.isTimeSlotAvailable(
                 command.projectId(),
                 command.startTime(),
@@ -135,30 +135,50 @@ public class BookAppointmentUseCase {
         if (!isAvailable) {
             throw new TimeSlotNotAvailableException(
                     String.format(
-                            "Time slot from %s to %s is already booked",
+                            "Time slot from %s to %s is already booked for this project",
                             command.startTime(),
                             command.endTime()));
         }
 
-        // Step 2: Create appointment (domain validates business rules)
+        // Step 2: Check availability at EMPLOYEE level (if employee is specified)
+        if (command.employeeId() != null) {
+            boolean isEmployeeAvailable = appointmentRepository.isEmployeeAvailable(
+                    command.employeeId(),
+                    command.startTime(),
+                    command.endTime(),
+                    null // null because this is a new appointment
+            );
+
+            if (!isEmployeeAvailable) {
+                throw new EmployeeNotAvailableException(
+                        String.format(
+                                "Employee %s is not available from %s to %s - already has an appointment",
+                                command.employeeId(),
+                                command.startTime(),
+                                command.endTime()));
+            }
+        }
+
+        // Step 3: Create appointment (domain validates business rules)
         Appointment appointment = Appointment.create(
                 command.projectId(),
                 command.userId(),
                 command.serviceId(),
+                command.employeeId(),
                 command.startTime(),
                 command.endTime(),
-                command.price(),
-                command.currency(),
+                command.priceSnapshot(),
+                command.currencySnapshot(),
                 command.userNotes());
 
-        // Step 3: Save to database
+        // Step 4: Save to database
         Appointment savedAppointment = appointmentRepository.save(appointment);
 
-        // Step 4: Publish domain event (triggers n8n notification)
+        // Step 5: Publish domain event (triggers n8n notification)
         AppointmentBookedEvent event = AppointmentBookedEvent.from(savedAppointment);
         eventPublisher.publishEvent(event);
 
-        // Step 5: Return the created appointment
+        // Step 6: Return the created appointment
         return savedAppointment;
     }
 
@@ -178,34 +198,32 @@ public class BookAppointmentUseCase {
      * <li>Built-in equals/hashCode/toString</li>
      * <li>Clear intent: this is just data, no behavior</li>
      * </ul>
+     * Command to book an appointment.
      * 
      * <p>
-     * <strong>Why not use Appointment directly?</strong>
+     * This is a <strong>Command</strong> pattern (CQRS), representing the intent
+     * to book an appointment. It's immutable and contains all the data needed.
      * </p>
-     * <ul>
-     * <li>Separation of concerns: API layer uses DTOs, domain uses entities</li>
-     * <li>Flexibility: Command can have different fields than Appointment</li>
-     * <li>Validation: Can add validation annotations here without polluting
-     * domain</li>
-     * </ul>
      * 
-     * @param projectId Project/business identifier
-     * @param userId    User who is booking the appointment
-     * @param serviceId Service being booked
-     * @param startTime Appointment start time
-     * @param endTime   Appointment end time
-     * @param price     Price of the service at booking time
-     * @param currency  Currency code (e.g., "COP", "USD")
-     * @param userNotes Optional notes from the user
+     * @param projectId        Project identifier
+     * @param userId           User identifier
+     * @param serviceId        Service identifier
+     * @param employeeId       Employee identifier (optional)
+     * @param startTime        Start time
+     * @param endTime          End time
+     * @param priceSnapshot    Price at booking time
+     * @param currencySnapshot Currency code
+     * @param userNotes        User notes (optional)
      */
     public record BookAppointmentCommand(
             UUID projectId,
             UUID userId,
             Integer serviceId,
+            UUID employeeId,
             ZonedDateTime startTime,
             ZonedDateTime endTime,
-            BigDecimal price,
-            String currency,
+            BigDecimal priceSnapshot,
+            String currencySnapshot,
             String userNotes) {
         /**
          * Compact constructor for validation.
@@ -236,10 +254,10 @@ public class BookAppointmentUseCase {
             if (endTime == null) {
                 throw new IllegalArgumentException("End time is required");
             }
-            if (price == null) {
+            if (priceSnapshot == null) {
                 throw new IllegalArgumentException("Price is required");
             }
-            if (currency == null || currency.isBlank()) {
+            if (currencySnapshot == null || currencySnapshot.isBlank()) {
                 throw new IllegalArgumentException("Currency is required");
             }
         }
@@ -270,6 +288,15 @@ public class BookAppointmentUseCase {
      */
     public static class TimeSlotNotAvailableException extends RuntimeException {
         public TimeSlotNotAvailableException(String message) {
+            super(message);
+        }
+    }
+
+    /**
+     * Exception thrown when an employee is not available for the requested time slot.
+     */
+    public static class EmployeeNotAvailableException extends RuntimeException {
+        public EmployeeNotAvailableException(String message) {
             super(message);
         }
     }

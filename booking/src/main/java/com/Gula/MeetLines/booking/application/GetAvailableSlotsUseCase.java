@@ -18,8 +18,18 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Use case for getting available appointment slots for a project on a specific
- * date.
+ * Use case for getting available appointment slots for an employee on a
+ * specific date.
+ * 
+ * <p>
+ * This use case calculates availability at the EMPLOYEE level:
+ * </p>
+ * <ul>
+ * <li>Uses project-level schedule configuration (business hours)</li>
+ * <li>Filters out slots where the specific employee already has
+ * appointments</li>
+ * <li>Allows multiple employees to have appointments at the same time</li>
+ * </ul>
  */
 @Service
 @RequiredArgsConstructor
@@ -30,16 +40,17 @@ public class GetAvailableSlotsUseCase {
         private final ObjectMapper objectMapper = new ObjectMapper();
 
         /**
-         * Executes the use case to get available slots.
+         * Executes the use case to get available slots for a specific employee.
          * 
-         * @param projectId The project identifier
-         * @param date      The date to check availability
-         * @return List of available TimeSlots
+         * @param projectId  The project identifier (to get schedule configuration)
+         * @param employeeId The employee identifier (to check their availability)
+         * @param date       The date to check availability
+         * @return List of available TimeSlots for this employee
          * @throws IllegalArgumentException if project not found or appointments
          *                                  disabled
          */
         @Transactional(readOnly = true)
-        public List<TimeSlot> execute(UUID projectId, LocalDate date) {
+        public List<TimeSlot> execute(UUID projectId, UUID employeeId, LocalDate date) {
                 // Step 1: Get project configuration
                 ProjectBotConfig config = projectBotConfigRepository.findByProjectId(projectId)
                                 .orElseThrow(() -> new IllegalArgumentException(
@@ -59,13 +70,13 @@ public class GetAvailableSlotsUseCase {
                                         "Invalid schedule configuration for project: " + projectId, e);
                 }
 
-                // Step 2: Check if appointments are enabled
+                // Step 3: Check if appointments are enabled
                 if (!scheduleConfig.isAppointmentEnabled()) {
                         throw new IllegalArgumentException(
                                         "Appointments are disabled for project: " + projectId);
                 }
 
-                // Step 3: Generate all possible slots for the date
+                // Step 4: Generate all possible slots for the date based on project schedule
                 List<TimeSlot> allSlots = scheduleConfig.generateSlotsForDate(date);
 
                 if (allSlots.isEmpty()) {
@@ -73,11 +84,11 @@ public class GetAvailableSlotsUseCase {
                         return allSlots;
                 }
 
-                // Step 4: Get booked appointments for that date
+                // Step 5: Get booked appointments for that EMPLOYEE on that date
                 List<Appointment> bookedAppointments = appointmentRepository
-                                .findByProjectIdAndDate(projectId, date);
+                                .findByEmployeeIdAndDate(employeeId, date);
 
-                // Step 5: Filter out booked slots
+                // Step 6: Filter out slots where this employee already has appointments
                 return allSlots.stream()
                                 .filter(slot -> !isSlotBooked(slot, bookedAppointments))
                                 .collect(Collectors.toList());
