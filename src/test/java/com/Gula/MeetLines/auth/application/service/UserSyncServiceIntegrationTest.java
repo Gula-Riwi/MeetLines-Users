@@ -1,7 +1,9 @@
 package com.Gula.MeetLines.auth.application.service;
 
-import com.Gula.MeetLines.auth.domain.entity.AppUser;
-import com.Gula.MeetLines.auth.domain.repository.AppUserRepository;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +14,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import com.Gula.MeetLines.auth.domain.entity.AppUser;
+import com.Gula.MeetLines.auth.domain.repository.AppUserRepository;
 
 /**
  * Integration test for UserSyncService using Testcontainers
