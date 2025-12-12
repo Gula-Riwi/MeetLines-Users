@@ -1,23 +1,18 @@
-# Multi-stage Dockerfile for MeetLines Users Microservice
-# Stage 1: Build
-FROM eclipse-temurin:17-jdk-alpine AS builder
+# Multi-stage Dockerfile for MeetLines Auth Service
+# Stage 1: Build using Maven image
+FROM maven:3.9-eclipse-temurin-17-alpine AS builder
 
 WORKDIR /app
 
-# Copy Maven wrapper and pom.xml
-COPY mvnw .
-COPY mvnw.cmd .
-COPY .mvn .mvn
-COPY pom.xml .
-
-# Download dependencies (cached layer)
-RUN ./mvnw dependency:go-offline -B
+# Copy pom files
+COPY pom.xml ./
+COPY auth/pom.xml ./auth/
 
 # Copy source code
-COPY src src
+COPY auth/src ./auth/src/
 
-# Build the application (skip tests for faster builds, tests run in CI)
-RUN ./mvnw clean package -DskipTests
+# Download dependencies and build
+RUN mvn clean package -DskipTests -pl auth -B
 
 # Stage 2: Runtime
 FROM eclipse-temurin:17-jre-alpine
@@ -29,7 +24,7 @@ RUN addgroup -S spring && adduser -S spring -G spring
 USER spring:spring
 
 # Copy JAR from builder stage
-COPY --from=builder /app/target/*.jar app.jar
+COPY --from=builder /app/auth/target/auth-*.jar app.jar
 
 # Expose application port
 EXPOSE 8081
