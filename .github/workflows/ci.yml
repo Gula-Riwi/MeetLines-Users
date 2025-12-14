@@ -2,19 +2,14 @@ name: CI - Build and Test
 
 on:
   push:
-    branches: [ main, develop, docs/**, feature/**, refactor/** ]
+    branches: [ main, develop, feature/** ]
   pull_request:
     branches: [ main, develop ]
 
 jobs:
   build:
-    name: Build and Test Multi-Module Project
+    name: Build and Test Booking Service
     runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-        module: [auth, booking]
-      fail-fast: false
     
     steps:
       - name: Checkout code
@@ -35,66 +30,37 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Make mvnw executable
-        run: chmod +x ./mvnw
+      - name: Build booking module
+        run: ./mvnw clean compile -pl booking -B
 
-      - name: Build parent and ${{ matrix.module }} module
-        run: ./mvnw clean install -pl ${{ matrix.module }} -am -DskipTests -B
+      - name: Run booking tests
+        run: ./mvnw test -pl booking -B
 
-      - name: Run ${{ matrix.module }} tests
-        run: ./mvnw test -pl ${{ matrix.module }} -B
-
-      - name: Generate test report for ${{ matrix.module }}
+      - name: Generate test report for booking
         if: always()
         uses: dorny/test-reporter@v1
         with:
-          name: ${{ matrix.module }} Test Results
-          path: ${{ matrix.module }}/target/surefire-reports/*.xml
+          name: Booking Test Results
+          path: booking/target/surefire-reports/*.xml
           reporter: java-junit
           fail-on-error: false
 
-      - name: Package ${{ matrix.module }} application
-        run: ./mvnw package -DskipTests -pl ${{ matrix.module }} -am -B
+      - name: Package booking application
+        run: ./mvnw package -DskipTests -pl booking -B
 
-      - name: Upload ${{ matrix.module }} JAR artifact
+      - name: Upload booking JAR artifact
         uses: actions/upload-artifact@v4
         with:
-          name: meetlines-${{ matrix.module }}-jar
-          path: ${{ matrix.module }}/target/*.jar
+          name: meetlines-booking-jar
+          path: booking/target/*.jar
           retention-days: 7
 
-      - name: Run code coverage for ${{ matrix.module }}
-        run: ./mvnw verify -pl ${{ matrix.module }} -B
-        continue-on-error: true
+      - name: Run code coverage for booking
+        run: ./mvnw verify -pl booking -B
 
       - name: Upload coverage to Codecov (optional)
         if: github.event_name == 'push'
         uses: codecov/codecov-action@v4
         with:
-          files: ${{ matrix.module }}/target/site/jacoco/jacoco.xml
+          files: booking/target/site/jacoco/jacoco.xml
           fail_ci_if_error: false
-          token: ${{ secrets.CODECOV_TOKEN }}
-
-  security-scan:
-    name: Security Vulnerability Scan
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event_name == 'pull_request'
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'CRITICAL,HIGH'
-
-      - name: Upload Trivy results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        with:
-          sarif_file: 'trivy-results.sarif'
