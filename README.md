@@ -1,6 +1,6 @@
 # MeetLines
 
-A microservices-based meeting room booking platform built with Spring Boot.
+A microservices-based meeting room booking platform built with Spring Boot and secured with Keycloak OAuth2.
 
 ## 🚀 Quick Start
 
@@ -24,18 +24,20 @@ Create a `.env` file in the root directory:
 
 ```env
 POSTGRES_PASSWORD=postgres
+KEYCLOAK_ADMIN_PASSWORD=admin
 ```
 
 ### 3. Start Infrastructure Services
 
-Start PostgreSQL:
+Start PostgreSQL and Keycloak:
 
 ```bash
-docker-compose up -d postgres
+docker-compose up -d
 ```
 
 This will start:
 - **PostgreSQL** on `localhost:5432`
+- **Keycloak** on `http://localhost:8080`
 
 ### 4. Run the Application
 
@@ -78,7 +80,24 @@ MeetLines/
 
 ## 🔐 Authentication
 
-The platform provides authentication and user management capabilities through the Auth service.
+MeetLines uses **Keycloak** for OAuth2/OpenID Connect authentication.
+
+### Access Keycloak Admin Console
+
+1. Navigate to: http://localhost:8080/admin
+2. Login with:
+   - **Username:** `admin`
+   - **Password:** `admin` (or value from `.env`)
+3. Realm: `meetlines`
+
+### API Authentication
+
+All protected endpoints require a Bearer token in the Authorization header:
+
+```bash
+curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  http://localhost:8081/api/auth/me
+```
 
 ### Get a Token
 
@@ -110,7 +129,7 @@ curl -X POST http://localhost:8080/realms/meetlines/protocol/openid-connect/toke
   "email": "user@example.com",
   "fullName": "John Doe",
   "phone": null,
-  "authProvider": "local",
+  "authProvider": "keycloak",
   "isEmailVerified": true,
   "createdAt": "2025-12-05T19:41:00"
 }
@@ -169,7 +188,7 @@ mvn spring-boot:run -Dspring-boot.run.profiles=dev
 
 #### Full Stack Development Environment
 
-Run the entire application stack (PostgreSQL and both microservices) with Docker:
+Run the entire application stack (PostgreSQL, Keycloak, and Auth Service) with Docker:
 
 ```bash
 # Build and start all services
@@ -187,23 +206,19 @@ docker compose down -v
 
 **Services Running:**
 - **PostgreSQL**: `localhost:5432`
+- **Keycloak**: `http://localhost:8080`
 - **Auth Service**: `http://localhost:8081`
-- **Booking Service**: `http://localhost:8082`
 
-#### Infrastructure Only (Database)
+#### Infrastructure Only (Database + Keycloak)
 
-If you want to run the application locally but use Docker for database:
+If you want to run the application locally but use Docker for infrastructure:
 
 ```bash
-# Start only PostgreSQL
-docker-compose up -d postgres
+# Start only PostgreSQL and Keycloak
+docker-compose up -d postgres keycloak
 
-# Then run the services locally
+# Then run the app locally
 cd auth
-mvn spring-boot:run
-
-# In another terminal for booking service
-cd booking
 mvn spring-boot:run
 ```
 
@@ -235,10 +250,13 @@ docker build -t meetlines-auth:0.0.1-SNAPSHOT -f auth/Dockerfile .
 docker run -d \
   --name meetlines-auth \
   -p 8081:8081 \
-  -e SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/meetline \
-  -e SPRING_DATASOURCE_USERNAME=postgres \
-  -e SPRING_DATASOURCE_PASSWORD=postgres \
-  --network meetlines_network \
+  -e DB_HOST=postgres \
+  -e DB_PORT=5432 \
+  -e DB_NAME=postgres \
+  -e DB_USERNAME=postgres \
+  -e DB_PASSWORD=postgres \
+  -e KEYCLOAK_ISSUER_URI=http://keycloak:8080/realms/meetlines \
+  --network keycloak_network \
   meetlines-auth:latest
 
 # View logs
@@ -254,8 +272,8 @@ docker rm meetlines-auth
 The `docker-compose.yaml` includes:
 
 - **postgres**: PostgreSQL 15 database with persistent volume
-- **meetlines-auth**: Auth microservice
-- **meetlines-booking**: Booking microservice
+- **keycloak**: Keycloak 24.0.1 in dev mode
+- **auth** (optional): Auth microservice
 
 Environment variables are loaded from `.env` file.
 
@@ -265,9 +283,22 @@ Create a `.env` file with:
 
 ```env
 # Database
-POSTGRES_DB=meetline
+POSTGRES_DB=postgres
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
+
+# Keycloak
+KEYCLOAK_ADMIN=admin
+KEYCLOAK_ADMIN_PASSWORD=admin
+
+# Application (if running auth in Docker)
+DB_HOST=postgres
+DB_PORT=5432
+DB_NAME=postgres
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
+KEYCLOAK_ISSUER_URI=http://keycloak:8080/realms/meetlines
+KEYCLOAK_JWK_SET_URI=http://keycloak:8080/realms/meetlines/protocol/openid-connect/certs
 ```
 
 ### Docker Compose Commands
@@ -277,7 +308,7 @@ POSTGRES_PASSWORD=postgres
 docker-compose up -d
 
 # Start specific services
-docker-compose up -d postgres meetlines-auth meetlines-booking
+docker-compose up -d postgres keycloak
 
 # Rebuild and start
 docker-compose up -d --build
