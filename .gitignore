@@ -15,6 +15,7 @@
 
 # Package Files #
 *.jar
+!.mvn/wrapper/maven-wrapper.jar
 *.war
 *.nar
 *.ear
@@ -30,7 +31,6 @@ replay_pid*
 HELP.md
 */target/
 **/target/
-.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 
@@ -61,8 +61,10 @@ build/
 
 ### VS Code ###
 .vscode/
-.mvn/wrapper/maven-wrapper.properties
 
+### Project Directories ###
+Meetlines-Frontend/
+MeetLines-Wiki/
 
 docs/architecture.md
 docs/bots.md
