@@ -31,6 +31,7 @@ jobs:
     strategy:
       matrix:
         module: [auth, booking]
+      fail-fast: false
 
     steps:
       - name: Checkout code
@@ -66,6 +67,10 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=${{ matrix.module }}
           cache-to: type=gha,mode=max,scope=${{ matrix.module }}
+          build-args: |
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+            VCS_REF=${{ github.sha }}
+            VERSION=${{ github.ref_name }}
 
   deploy:
     name: Deploy to VPS
