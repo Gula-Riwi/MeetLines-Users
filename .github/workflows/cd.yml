@@ -4,17 +4,6 @@ on:
   push:
     branches: [ main ]
   workflow_dispatch:
-    inputs:
-      deploy_auth:
-        description: 'Deploy Auth service'
-        required: false
-        default: 'true'
-        type: boolean
-      deploy_booking:
-        description: 'Deploy Booking service'
-        required: false
-        default: 'true'
-        type: boolean
 
 env:
   REGISTRY: ghcr.io
@@ -22,16 +11,11 @@ env:
 
 jobs:
   build-and-push:
-    name: Build and Push Docker Images
+    name: Build and Push Booking Docker Image
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-    
-    strategy:
-      matrix:
-        module: [auth, booking]
-      fail-fast: false
 
     steps:
       - name: Checkout code
@@ -47,30 +31,26 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata for ${{ matrix.module }}
+      - name: Extract metadata for booking
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-${{ matrix.module }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-booking
           tags: |
             type=ref,event=branch
             type=sha,prefix={{branch}}-
             type=raw,value=latest,enable={{is_default_branch}}
 
-      - name: Build and push ${{ matrix.module }} Docker image
+      - name: Build and push booking Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./${{ matrix.module }}/Dockerfile
+          file: ./booking/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha,scope=${{ matrix.module }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.module }}
-          build-args: |
-            BUILD_DATE=${{ github.event.head_commit.timestamp }}
-            VCS_REF=${{ github.sha }}
-            VERSION=${{ github.ref_name }}
+          cache-from: type=gha,scope=booking
+          cache-to: type=gha,mode=max,scope=booking
 
   deploy:
     name: Deploy to VPS
