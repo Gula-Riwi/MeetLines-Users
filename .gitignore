@@ -63,6 +63,9 @@ build/
 .vscode/
 .mvn/wrapper/maven-wrapper.properties
 
+### Project Directories ###
+Meetlines-Frontend/
+MeetLines-Wiki/
 
 docs/architecture.md
 docs/bots.md
