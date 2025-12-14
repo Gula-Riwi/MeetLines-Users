@@ -42,14 +42,14 @@ jobs:
       - name: Run booking tests
         run: mvn test -pl booking -B
 
-      - name: Generate test report for booking
-        if: always()
-        uses: dorny/test-reporter@v1
-        with:
-          name: Booking Test Results
-          path: booking/target/surefire-reports/*.xml
-          reporter: java-junit
-          fail-on-error: false
+      # - name: Generate test report for booking
+      #   if: always()
+      #   uses: dorny/test-reporter@v1
+      #   with:
+      #     name: Booking Test Results
+      #     path: booking/target/surefire-reports/*.xml
+      #     reporter: java-junit
+      #     fail-on-error: false
 
       - name: Package booking application
         run: mvn package -DskipTests -pl booking -B
