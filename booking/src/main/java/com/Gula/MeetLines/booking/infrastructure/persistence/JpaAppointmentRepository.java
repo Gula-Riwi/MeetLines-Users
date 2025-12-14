@@ -99,6 +99,14 @@ public class JpaAppointmentRepository implements AppointmentRepository {
         }
 
         @Override
+        public List<Appointment> findByUserIdAndStatus(UUID userId, AppointmentStatus status) {
+                return springDataRepository.findByAppUserIdAndStatus(userId, status)
+                                .stream()
+                                .map(AppointmentEntity::toDomain)
+                                .collect(Collectors.toList());
+        }
+
+        @Override
         public List<Appointment> findByProjectId(UUID projectId) {
                 return springDataRepository.findByProjectId(projectId)
                                 .stream()
@@ -117,7 +125,7 @@ public class JpaAppointmentRepository implements AppointmentRepository {
         @Override
         public List<Appointment> findPendingAppointmentsToStart(ZonedDateTime currentTime) {
                 return springDataRepository.findByStatusAndStartTimeLessThanEqualOrderByStartTimeAsc(
-                                                AppointmentStatus.PENDING, currentTime)
+                                                AppointmentStatus.pending, currentTime)
                                 .stream()
                                 .map(AppointmentEntity::toDomain)
                                 .collect(Collectors.toList());
@@ -126,7 +134,7 @@ public class JpaAppointmentRepository implements AppointmentRepository {
         @Override
         public List<Appointment> findInProgressAppointmentsToComplete(ZonedDateTime currentTime) {
                 return springDataRepository.findByStatusAndEndTimeLessThanEqualOrderByEndTimeAsc(
-                                                AppointmentStatus.IN_PROGRESS, currentTime)
+                                                AppointmentStatus.in_progress, currentTime)
                                 .stream()
                                 .map(AppointmentEntity::toDomain)
                                 .collect(Collectors.toList());

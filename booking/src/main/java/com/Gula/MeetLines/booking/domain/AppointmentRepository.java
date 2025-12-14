@@ -103,6 +103,19 @@ public interface AppointmentRepository {
         List<Appointment> findByUserId(UUID userId);
 
         /**
+         * Finds active (pending) appointments for a specific user.
+         * 
+         * <p>
+         * <strong>Use case:</strong> User wants to see their upcoming appointments.
+         * </p>
+         * 
+         * @param userId The user identifier
+         * @param status The appointment status to filter
+         * @return List of appointments (empty list if none found)
+         */
+        List<Appointment> findByUserIdAndStatus(UUID userId, AppointmentStatus status);
+
+        /**
          * Finds all appointments for a specific project.
          * 
          * <p>

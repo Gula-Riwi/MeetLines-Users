@@ -190,7 +190,7 @@ public class Appointment {
                 employeeId,
                 startTime,
                 endTime,
-                AppointmentStatus.PENDING, // Initial status is always PENDING
+                AppointmentStatus.pending, // Initial status is always pending
                 priceSnapshot,
                 currencySnapshot,
                 null, // Meeting link is generated later
@@ -218,12 +218,12 @@ public class Appointment {
      * @throws IllegalStateException if the appointment is not in PENDING status
      */
     public void start(String meetingLink) {
-        if (this.status != AppointmentStatus.PENDING) {
+        if (this.status != AppointmentStatus.pending) {
             throw new IllegalStateException(
-                    "Only PENDING appointments can be started. Current status: " + this.status);
+                    "Only pending appointments can be started. Current status: " + this.status);
         }
 
-        this.status = AppointmentStatus.IN_PROGRESS;
+        this.status = AppointmentStatus.in_progress;
         this.meetingLink = meetingLink;
         this.updatedAt = ZonedDateTime.now();
     }
@@ -236,15 +236,15 @@ public class Appointment {
      *                               cancelled
      */
     public void cancel(String adminNotes) {
-        if (this.status == AppointmentStatus.CANCELLED) {
+        if (this.status == AppointmentStatus.cancelled) {
             throw new IllegalStateException("The appointment is already cancelled");
         }
 
-        if (this.status == AppointmentStatus.COMPLETED) {
+        if (this.status == AppointmentStatus.completed) {
             throw new IllegalStateException("Cannot cancel an already completed appointment");
         }
 
-        this.status = AppointmentStatus.CANCELLED;
+        this.status = AppointmentStatus.cancelled;
         this.adminNotes = adminNotes;
         this.updatedAt = ZonedDateTime.now();
     }
@@ -259,12 +259,12 @@ public class Appointment {
      * @throws IllegalStateException if the appointment is not in progress
      */
     public void complete() {
-        if (this.status != AppointmentStatus.IN_PROGRESS) {
+        if (this.status != AppointmentStatus.in_progress) {
             throw new IllegalStateException(
-                    "Only IN_PROGRESS appointments can be completed. Current status: " + this.status);
+                    "Only in_progress appointments can be completed. Current status: " + this.status);
         }
 
-        this.status = AppointmentStatus.COMPLETED;
+        this.status = AppointmentStatus.completed;
         this.updatedAt = ZonedDateTime.now();
     }
 
@@ -277,7 +277,7 @@ public class Appointment {
      * @throws IllegalArgumentException if the time range is invalid
      */
     public void reschedule(ZonedDateTime newStartTime, ZonedDateTime newEndTime) {
-        if (this.status == AppointmentStatus.CANCELLED || this.status == AppointmentStatus.COMPLETED) {
+        if (this.status == AppointmentStatus.cancelled || this.status == AppointmentStatus.completed) {
             throw new IllegalStateException(
                     "Cannot reschedule a cancelled or completed appointment");
         }
@@ -357,8 +357,8 @@ public class Appointment {
      * @return true if the appointment is pending or in progress
      */
     public boolean isActive() {
-        return this.status == AppointmentStatus.PENDING ||
-                this.status == AppointmentStatus.IN_PROGRESS;
+        return this.status == AppointmentStatus.pending ||
+                this.status == AppointmentStatus.in_progress;
     }
 
     /**
@@ -367,8 +367,8 @@ public class Appointment {
      * @return true if the appointment is not cancelled or completed
      */
     public boolean canBeModified() {
-        return this.status != AppointmentStatus.CANCELLED &&
-                this.status != AppointmentStatus.COMPLETED;
+        return this.status != AppointmentStatus.cancelled &&
+                this.status != AppointmentStatus.completed;
     }
 
     /**

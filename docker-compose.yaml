@@ -1,114 +1,19 @@
 services:
-  # PostgreSQL local comentado - usando base de datos remota en 46.224.13.157
-  postgres:
-    image: postgres:15
-    container_name: keycloak_db
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-postgres}
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env file}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    networks:
-      - keycloak_network
-    mem_limit: 512m
-    memswap_limit: 1024m
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 512M
-        reservations:
-          cpus: '0.5'
-          memory: 256M
-
-  keycloak:
-    image: quay.io/keycloak/keycloak:24.0.1
-    container_name: keycloak
-    command: start-dev
-    environment:
-      KC_DB: postgres
-      KC_DB_URL_HOST: postgres
-      KC_DB_URL_PORT: 5432
-      KC_DB_URL_DATABASE: ${POSTGRES_DB:-postgres}
-      KC_DB_USERNAME: ${POSTGRES_USER:-postgres}
-      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env file}
-      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?KEYCLOAK_ADMIN_PASSWORD must be set in .env file}
-    ports:
-      - "8080:8080"
-    depends_on:
-      - postgres
-    networks:
-      - keycloak_network
-    mem_limit: 1024m
-    memswap_limit: 2048m
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: 1024M
-        reservations:
-          cpus: '1'
-          memory: 512M
-
-  meetlines-auth:
-    build:
-      context: .
-      dockerfile: ./auth/Dockerfile
-    container_name: meetlines-auth
-    ports:
-      - "8081:8081"
-    environment:
-      SPRING_PROFILES_ACTIVE: dev,oauth
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/meetline
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env file}
-      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/meetlines
-      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/meetlines/protocol/openid-connect/certs
-      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
-      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET} 
-    depends_on:
-      - postgres
-      - keycloak
-    networks:
-      - keycloak_network
-    mem_limit: 768m
-    memswap_limit: 1536m
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 768M
-        reservations:
-          cpus: '0.5'
-          memory: 384M
-
-
   meetlines-booking:
     build:
       context: .
       dockerfile: ./booking/Dockerfile
     container_name: meetlines-booking
     ports:
-      - "8082:8082"
+      - "9282:9282"
     environment:
-      SPRING_PROFILES_ACTIVE: dev,oauth
-      SPRING_DATASOURCE_URL: jdbc:postgresql://46.224.13.157:5432/meetline
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-meetline}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env file}
-      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/meetlines
-      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/meetlines/protocol/openid-connect/certs
-      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
-      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
       SERVER_PORT: 8082
-    depends_on:
-      - postgres
-      - keycloak
     networks:
-      - keycloak_network
+      - meetlines_network
     mem_limit: 768m
     memswap_limit: 1536m
     deploy:
@@ -121,7 +26,7 @@ services:
           memory: 384M
 
 networks:
-  keycloak_network:
+  meetlines_network:
     driver: bridge
 
 volumes:

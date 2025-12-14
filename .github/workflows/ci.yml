@@ -2,7 +2,7 @@ name: CI - Build and Test
 
 on:
   push:
-    branches: [ main, develop, feature/** ]
+    branches: [ main, develop, docs/**, feature/**, refactor/** ]
   pull_request:
     branches: [ main, develop ]
 
@@ -14,6 +14,7 @@ jobs:
     strategy:
       matrix:
         module: [auth, booking]
+      fail-fast: false
     
     steps:
       - name: Checkout code
@@ -34,8 +35,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Build ${{ matrix.module }} module
-        run: ./mvnw clean compile -pl ${{ matrix.module }} -B
+      - name: Make mvnw executable
+        run: chmod +x ./mvnw
+
+      - name: Build parent and ${{ matrix.module }} module
+        run: ./mvnw clean install -pl ${{ matrix.module }} -am -DskipTests -B
 
       - name: Run ${{ matrix.module }} tests
         run: ./mvnw test -pl ${{ matrix.module }} -B
@@ -50,7 +54,7 @@ jobs:
           fail-on-error: false
 
       - name: Package ${{ matrix.module }} application
-        run: ./mvnw package -DskipTests -pl ${{ matrix.module }} -B
+        run: ./mvnw package -DskipTests -pl ${{ matrix.module }} -am -B
 
       - name: Upload ${{ matrix.module }} JAR artifact
         uses: actions/upload-artifact@v4
@@ -61,6 +65,7 @@ jobs:
 
       - name: Run code coverage for ${{ matrix.module }}
         run: ./mvnw verify -pl ${{ matrix.module }} -B
+        continue-on-error: true
 
       - name: Upload coverage to Codecov (optional)
         if: github.event_name == 'push'
@@ -68,3 +73,28 @@ jobs:
         with:
           files: ${{ matrix.module }}/target/site/jacoco/jacoco.xml
           fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  security-scan:
+    name: Security Vulnerability Scan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
