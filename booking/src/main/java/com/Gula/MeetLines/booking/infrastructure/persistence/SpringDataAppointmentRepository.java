@@ -169,7 +169,7 @@ public interface SpringDataAppointmentRepository extends JpaRepository<Appointme
         @Query("""
                         SELECT a FROM AppointmentEntity a
                         WHERE a.projectId = :projectId
-                        AND a.status IN ('PENDING', 'IN_PROGRESS')
+                        AND a.status IN ('pending', 'in_progress')
                         AND a.startTime < :endTime
                         AND a.endTime > :startTime
                         AND (:excludeId IS NULL OR a.id != :excludeId)
@@ -198,7 +198,7 @@ public interface SpringDataAppointmentRepository extends JpaRepository<Appointme
         @Query("""
                         SELECT a FROM AppointmentEntity a
                         WHERE a.employeeId = :employeeId
-                        AND a.status IN ('PENDING', 'IN_PROGRESS')
+                        AND a.status IN ('pending', 'in_progress')
                         AND a.startTime < :endTime
                         AND a.endTime > :startTime
                         AND (:excludeId IS NULL OR a.id != :excludeId)
@@ -242,7 +242,7 @@ public interface SpringDataAppointmentRepository extends JpaRepository<Appointme
                         SELECT a FROM AppointmentEntity a
                         WHERE a.projectId = :projectId
                         AND CAST(a.startTime AS date) = :date
-                        AND a.status IN ('PENDING', 'IN_PROGRESS')
+                        AND a.status IN ('pending', 'in_progress')
                         ORDER BY a.startTime ASC
                         """)
         List<AppointmentEntity> findByProjectIdAndDate(
@@ -264,7 +264,7 @@ public interface SpringDataAppointmentRepository extends JpaRepository<Appointme
                         SELECT a FROM AppointmentEntity a
                         WHERE a.employeeId = :employeeId
                         AND CAST(a.startTime AS date) = :date
-                        AND a.status IN ('PENDING', 'IN_PROGRESS')
+                        AND a.status IN ('pending', 'in_progress')
                         ORDER BY a.startTime ASC
                         """)
         List<AppointmentEntity> findByEmployeeIdAndDate(

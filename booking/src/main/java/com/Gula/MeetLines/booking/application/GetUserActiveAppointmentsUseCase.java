@@ -27,6 +27,6 @@ public class GetUserActiveAppointmentsUseCase {
      */
     @Transactional(readOnly = true)
     public List<Appointment> execute(UUID userId) {
-        return appointmentRepository.findByUserIdAndStatus(userId, AppointmentStatus.PENDING);
+        return appointmentRepository.findByUserIdAndStatus(userId, AppointmentStatus.pending);
     }
 }
