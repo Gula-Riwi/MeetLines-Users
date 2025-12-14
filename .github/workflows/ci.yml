@@ -2,7 +2,7 @@ name: CI - Build and Test
 
 on:
   push:
-    branches: [ main, develop, feature/** ]
+    branches: [ main, develop, docs/**, feature/**, refactor/** ]
   pull_request:
     branches: [ main, develop ]
 
@@ -14,6 +14,7 @@ jobs:
     strategy:
       matrix:
         module: [auth, booking]
+      fail-fast: false
     
     steps:
       - name: Checkout code
