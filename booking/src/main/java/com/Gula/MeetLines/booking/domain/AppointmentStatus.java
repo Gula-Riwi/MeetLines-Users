@@ -74,7 +74,7 @@ public enum AppointmentStatus {
      * <li>→ CANCELLED (if user or admin cancels)</li>
      * </ul>
      */
-    PENDING("pending", "Pending"),
+    pending("pending", "Pending"),
 
     /**
      * The appointment is currently in progress.
@@ -94,7 +94,7 @@ public enum AppointmentStatus {
      * <li>→ CANCELLED (if cancelled during the appointment)</li>
      * </ul>
      */
-    IN_PROGRESS("in_progress", "In Progress"),
+    in_progress("in_progress", "In Progress"),
 
     /**
      * The appointment has been successfully completed.
@@ -104,7 +104,7 @@ public enum AppointmentStatus {
      * <strong>Allowed transitions:</strong> None (terminal state)
      * </p>
      */
-    COMPLETED("completed", "Completed"),
+    completed("completed", "Completed"),
 
     /**
      * The appointment has been cancelled.
@@ -114,7 +114,7 @@ public enum AppointmentStatus {
      * <strong>Allowed transitions:</strong> None (terminal state)
      * </p>
      */
-    CANCELLED("cancelled", "Cancelled");
+    cancelled("cancelled", "Cancelled");
 
     // ==================== FIELDS ====================
 
@@ -177,7 +177,7 @@ public enum AppointmentStatus {
      * @return true if the appointment can be modified in this status
      */
     public boolean canBeModified() {
-        return this == PENDING;
+        return this == pending;
     }
 
     /**
@@ -191,7 +191,7 @@ public enum AppointmentStatus {
      * @return true if the appointment can be cancelled in this status
      */
     public boolean canBeCancelled() {
-        return this == PENDING || this == IN_PROGRESS;
+        return this == pending || this == in_progress;
     }
 
     /**
@@ -204,7 +204,7 @@ public enum AppointmentStatus {
      * @return true if the appointment can transition to IN_PROGRESS
      */
     public boolean canStart() {
-        return this == PENDING;
+        return this == pending;
     }
 
     /**
@@ -217,7 +217,7 @@ public enum AppointmentStatus {
      * @return true if the appointment can be completed in this status
      */
     public boolean canBeCompleted() {
-        return this == IN_PROGRESS;
+        return this == in_progress;
     }
 
     /**
@@ -226,7 +226,7 @@ public enum AppointmentStatus {
      * @return true if this is COMPLETED or CANCELLED
      */
     public boolean isTerminal() {
-        return this == COMPLETED || this == CANCELLED;
+        return this == completed || this == cancelled;
     }
 
     /**
@@ -236,7 +236,7 @@ public enum AppointmentStatus {
      * @return true if this is PENDING or IN_PROGRESS
      */
     public boolean isActive() {
-        return this == PENDING || this == IN_PROGRESS;
+        return this == pending || this == in_progress;
     }
 
     /**
@@ -286,18 +286,18 @@ public enum AppointmentStatus {
             throw new IllegalArgumentException("Start time must be before end time");
         }
 
-        // Before start time → PENDING
+        // Before start time → pending
         if (currentTime.isBefore(startTime)) {
-            return PENDING;
+            return pending;
         }
 
-        // Between start and end → IN_PROGRESS
+        // Between start and end → in_progress
         if (currentTime.isBefore(endTime)) {
-            return IN_PROGRESS;
+            return in_progress;
         }
 
-        // After end time → COMPLETED
-        return COMPLETED;
+        // After end time → completed
+        return completed;
     }
 
     // ==================== FACTORY METHODS ====================

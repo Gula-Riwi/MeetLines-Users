@@ -9,37 +9,31 @@ services:
       - "8081:8081"
     environment:
       # Database Configuration
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT:-5432}
-      DB_NAME: ${DB_NAME}
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
-      
-      # Keycloak OAuth2 Configuration
-      KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
-      KEYCLOAK_JWK_SET_URI: ${KEYCLOAK_JWK_SET_URI}
-      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
-      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${DB_HOST}:${DB_PORT:-5432}/${DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
       
       # Spring Configuration
       SPRING_PROFILES_ACTIVE: prod
+      SERVER_PORT: 8081
       
       # JVM Options
-      JAVA_OPTS: "-Xmx512m -Xms256m"
+      JAVA_OPTS: "-Xmx768m -Xms384m -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
     
     networks:
-      - meetlines-agent
+      - meetlines-network
     
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8081/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 60s
     
     labels:
       - "com.meetlines.service=auth"
       - "com.meetlines.environment=production"
+      - "com.meetlines.version=1.0"
 
   meetlines-booking:
     image: ghcr.io/gula-riwi/meetlines-users-booking:latest
@@ -49,39 +43,33 @@ services:
       - "8082:8082"
     environment:
       # Database Configuration
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT:-5432}
-      DB_NAME: ${DB_NAME}
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
-      
-      # Keycloak OAuth2 Configuration
-      KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
-      KEYCLOAK_JWK_SET_URI: ${KEYCLOAK_JWK_SET_URI}
-      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
-      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${DB_HOST}:${DB_PORT:-5432}/${DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
       
       # Spring Configuration
       SPRING_PROFILES_ACTIVE: prod
       SERVER_PORT: 8082
       
       # JVM Options
-      JAVA_OPTS: "-Xmx512m -Xms256m"
+      JAVA_OPTS: "-Xmx768m -Xms384m -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
     
     networks:
-      - meetlines-agent
+      - meetlines-network
     
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8082/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 60s
     
     labels:
       - "com.meetlines.service=booking"
       - "com.meetlines.environment=production"
+      - "com.meetlines.version=1.0"
 
 networks:
-  meetlines-agent:
-    external: true
+  meetlines-network:
+    driver: bridge
+    name: meetlines-network
