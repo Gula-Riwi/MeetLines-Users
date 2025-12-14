@@ -7,8 +7,7 @@ WORKDIR /app
 # Copy parent pom first
 COPY pom.xml ./
 
-# Copy both module poms (required for parent pom to resolve)
-COPY auth/pom.xml ./auth/
+# Copy booking module pom
 COPY booking/pom.xml ./booking/
 
 # Copy booking source code
