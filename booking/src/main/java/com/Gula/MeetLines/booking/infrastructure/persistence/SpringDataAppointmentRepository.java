@@ -41,6 +41,19 @@ public interface SpringDataAppointmentRepository extends JpaRepository<Appointme
         List<AppointmentEntity> findByAppUserId(UUID appUserId);
 
         /**
+         * Finds appointments by user ID and status.
+         * 
+         * <p>
+         * Spring generates: SELECT * FROM appointments WHERE app_users_id = ? AND status = ?
+         * </p>
+         * 
+         * @param appUserId User identifier
+         * @param status Appointment status
+         * @return List of appointment entities
+         */
+        List<AppointmentEntity> findByAppUserIdAndStatus(UUID appUserId, AppointmentStatus status);
+
+        /**
          * Finds appointments by project ID.
          * 
          * <p>

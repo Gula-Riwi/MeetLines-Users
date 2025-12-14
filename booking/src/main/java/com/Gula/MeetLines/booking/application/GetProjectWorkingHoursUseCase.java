@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -71,9 +73,20 @@ public class GetProjectWorkingHoursUseCase {
             return WorkingHoursInfo.closed();
         }
 
+        // Get current time in Colombia timezone
+        ZonedDateTime nowInColombia = ZonedDateTime.now(ZoneId.of("America/Bogota"));
+        LocalTime currentTime = nowInColombia.toLocalTime();
+        LocalDate today = nowInColombia.toLocalDate();
+
+        // Check if the requested date is today and if we are within working hours
+        boolean isCurrentlyOpen = date.equals(today) 
+                && currentTime.isAfter(daySchedule.getStartTime()) 
+                && currentTime.isBefore(daySchedule.getEndTime());
+
         return WorkingHoursInfo.open(
                 daySchedule.getStartTime(),
-                daySchedule.getEndTime());
+                daySchedule.getEndTime(),
+                isCurrentlyOpen);
     }
 
     /**
@@ -94,8 +107,8 @@ public class GetProjectWorkingHoursUseCase {
             return new WorkingHoursInfo(null, null, false);
         }
 
-        public static WorkingHoursInfo open(LocalTime openingTime, LocalTime closingTime) {
-            return new WorkingHoursInfo(openingTime, closingTime, true);
+        public static WorkingHoursInfo open(LocalTime openingTime, LocalTime closingTime, boolean isCurrentlyOpen) {
+            return new WorkingHoursInfo(openingTime, closingTime, isCurrentlyOpen);
         }
 
         public LocalTime getOpeningTime() {

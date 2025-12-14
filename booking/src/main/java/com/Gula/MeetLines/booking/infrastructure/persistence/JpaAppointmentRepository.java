@@ -99,6 +99,14 @@ public class JpaAppointmentRepository implements AppointmentRepository {
         }
 
         @Override
+        public List<Appointment> findByUserIdAndStatus(UUID userId, AppointmentStatus status) {
+                return springDataRepository.findByAppUserIdAndStatus(userId, status)
+                                .stream()
+                                .map(AppointmentEntity::toDomain)
+                                .collect(Collectors.toList());
+        }
+
+        @Override
         public List<Appointment> findByProjectId(UUID projectId) {
                 return springDataRepository.findByProjectId(projectId)
                                 .stream()

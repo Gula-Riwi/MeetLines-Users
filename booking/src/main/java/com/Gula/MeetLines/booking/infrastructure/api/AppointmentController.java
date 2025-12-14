@@ -11,6 +11,8 @@ import com.Gula.MeetLines.booking.application.GetAppointmentUseCase.AppointmentN
 import com.Gula.MeetLines.booking.application.GetAvailableSlotsUseCase;
 import com.Gula.MeetLines.booking.application.GetProjectWorkingHoursUseCase;
 import com.Gula.MeetLines.booking.application.GetProjectWorkingHoursUseCase.WorkingHoursInfo;
+import com.Gula.MeetLines.booking.application.GetUserActiveAppointmentsUseCase;
+import com.Gula.MeetLines.booking.application.GetUserAppointmentsUseCase;
 import com.Gula.MeetLines.booking.application.ListAppointmentsUseCase;
 import com.Gula.MeetLines.booking.domain.Appointment;
 import com.Gula.MeetLines.booking.domain.AppointmentStatus;
@@ -82,6 +84,8 @@ public class AppointmentController {
         private final ListAppointmentsUseCase listAppointmentsUseCase;
         private final GetAvailableSlotsUseCase getAvailableSlotsUseCase;
         private final GetProjectWorkingHoursUseCase getProjectWorkingHoursUseCase;
+        private final GetUserAppointmentsUseCase getUserAppointmentsUseCase;
+        private final GetUserActiveAppointmentsUseCase getUserActiveAppointmentsUseCase;
 
         /**
          * Books a new appointment.
@@ -287,15 +291,19 @@ public class AppointmentController {
                 return ResponseEntity.ok(response);
         }
 
-        /**Gets working hours for a project on a specific date.
+        /**
+         * Gets working hours for a project on a specific date.
          * 
          * <p>
-         * <strong>Endpoint:</strong> GET /api/v1/appointments/projects/{projectId}/working-hours?date=2025-12-12
+         * <strong>Endpoint:</strong> GET
+         * /api/v1/appointments/projects/{projectId}/working-hours?date=2025-12-12
          * </p>
          * 
          * <p>
-         * Returns the business hours (opening/closing times) for the project on a specific date.
-         * Useful for displaying business hours to users before they select appointment times.
+         * Returns the business hours (opening/closing times) for the project on a
+         * specific date.
+         * Useful for displaying business hours to users before they select appointment
+         * times.
          * </p>
          * 
          * <p>
@@ -334,12 +342,15 @@ public class AppointmentController {
                 WorkingHoursInfo info = getProjectWorkingHoursUseCase.execute(projectId, date);
 
                 WorkingHoursResponse response;
-                if (info.isOpen()) {
-                        response = WorkingHoursResponse.open(
+                if (info.getOpeningTime() != null && info.getClosingTime() != null) {
+                        // Day has working hours configured
+                        response = new WorkingHoursResponse(
                                         date.toString(),
-                                        info.getOpeningTime(),
-                                        info.getClosingTime());
+                                        info.getOpeningTime().toString(),
+                                        info.getClosingTime().toString(),
+                                        info.isOpen());
                 } else {
+                        // Day is closed (no working hours)
                         response = WorkingHoursResponse.closed(date.toString());
                 }
 
@@ -409,7 +420,8 @@ public class AppointmentController {
          * Exception handler for EmployeeNotAvailableException.
          * 
          * <p>
-         * Returns 409 Conflict when the employee is not available for the requested time slot.
+         * Returns 409 Conflict when the employee is not available for the requested
+         * time slot.
          * </p>
          * 
          * @param ex The exception
@@ -474,5 +486,56 @@ public class AppointmentController {
                 return ResponseEntity
                                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                                 .body(error);
+        }
+
+        /**
+         * Gets all appointments for a user (history).
+         * 
+         * <p>
+         * <strong>Endpoint:</strong> GET
+         * /api/v1/appointments/my/history?userId={userId}
+         * </p>
+         * 
+         * @param userId The user ID
+         * @return List of all user's appointments
+         */
+        @GetMapping("/my/history")
+        public ResponseEntity<List<AppointmentResponse>> getMyAppointments(
+                        @RequestParam UUID userId) {
+
+                log.info("Getting appointment history for user: {}", userId);
+
+                List<Appointment> appointments = getUserAppointmentsUseCase.execute(userId);
+
+                List<AppointmentResponse> response = appointments.stream()
+                                .map(AppointmentResponse::from)
+                                .toList();
+
+                return ResponseEntity.ok(response);
+        }
+
+        /**
+         * Gets active (pending) appointments for a user.
+         * 
+         * <p>
+         * <strong>Endpoint:</strong> GET /api/v1/appointments/my/active?userId={userId}
+         * </p>
+         * 
+         * @param userId The user ID
+         * @return List of user's pending appointments
+         */
+        @GetMapping("/my/active")
+        public ResponseEntity<List<AppointmentResponse>> getMyActiveAppointments(
+                        @RequestParam UUID userId) {
+
+                log.info("Getting active appointments for user: {}", userId);
+
+                List<Appointment> appointments = getUserActiveAppointmentsUseCase.execute(userId);
+
+                List<AppointmentResponse> response = appointments.stream()
+                                .map(AppointmentResponse::from)
+                                .toList();
+
+                return ResponseEntity.ok(response);
         }
 }
