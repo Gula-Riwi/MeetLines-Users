@@ -86,13 +86,13 @@ jobs:
             EOF
             
             # Download docker-compose.prod.yml
-            curl -o docker-compose.yml https://raw.githubusercontent.com/${{ github.repository }}/main/docker-compose.prod.yml
+            curl -f -o docker-compose.yml https://raw.githubusercontent.com/${{ github.repository }}/main/docker-compose.prod.yml || { echo "Failed to download docker-compose.yml"; exit 1; }
             
             # Login to GitHub Container Registry
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             
-            # Pull latest image
-            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-booking:latest
+            # Pull latest image with timeout
+            timeout 300 docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-booking:latest || { echo "Docker pull timeout or failed"; exit 1; }
             
             # Stop and remove old containers
             docker compose down || true
