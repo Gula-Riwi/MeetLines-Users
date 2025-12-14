@@ -4,6 +4,17 @@ on:
   push:
     branches: [ main ]
   workflow_dispatch:
+    inputs:
+      deploy_auth:
+        description: 'Deploy Auth service'
+        required: false
+        default: 'true'
+        type: boolean
+      deploy_booking:
+        description: 'Deploy Booking service'
+        required: false
+        default: 'true'
+        type: boolean
 
 env:
   REGISTRY: ghcr.io
