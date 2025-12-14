@@ -74,7 +74,7 @@ jobs:
           port: ${{ secrets.VPS_PORT || 32 }}
           script: |
             # Navigate to project directory
-            cd /opt/meetlines-users || mkdir -p /opt/meetlines-users && cd /opt/meetlines-users
+            cd /opt/meetlines-users || (mkdir -p /opt/meetlines-users && cd /opt/meetlines-users)
             
             # Create .env file with secrets
             cat > .env << EOF
