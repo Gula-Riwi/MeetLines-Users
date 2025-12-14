@@ -116,18 +116,54 @@ jobs:
             docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-booking:latest
             
             # Stop and remove old containers
-            docker-compose down || true
+            docker compose down || docker-compose down || true
             
             # Start new containers
-            docker-compose up -d
+            docker compose up -d || docker-compose up -d
             
-            # Clean up old images
-            docker image prune -af
+            # Wait for services to be ready
+            sleep 20
             
             # Show running containers
             docker ps
+            
+            # Clean up old images
+            docker image prune -af --filter "until=24h"
 
-      - name: Health Check
+      - name: Health Check - Auth Service
         run: |
-          sleep 30
-          curl -f https://meetlines.gula.crudzaso.com/actuator/health || exit 1
+          echo "Checking Auth service health..."
+          for i in {1..10}; do
+            if curl -f http://${{ secrets.VPS_HOST }}:8081/actuator/health; then
+              echo "Auth service is healthy!"
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying in 10 seconds..."
+            sleep 10
+          done
+          echo "Auth service health check failed"
+          exit 1
+
+      - name: Health Check - Booking Service
+        run: |
+          echo "Checking Booking service health..."
+          for i in {1..10}; do
+            if curl -f http://${{ secrets.VPS_HOST }}:8082/actuator/health; then
+              echo "Booking service is healthy!"
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying in 10 seconds..."
+            sleep 10
+          done
+          echo "Booking service health check failed"
+          exit 1
+
+      - name: Deployment Summary
+        if: always()
+        run: |
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Auth Service**: http://${{ secrets.VPS_HOST }}:8081" >> $GITHUB_STEP_SUMMARY
+          echo "- **Booking Service**: http://${{ secrets.VPS_HOST }}:8082" >> $GITHUB_STEP_SUMMARY
+          echo "- **Deployed by**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
