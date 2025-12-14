@@ -90,22 +90,19 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_PORT || 22 }}
+          port: ${{ secrets.VPS_PORT || 32 }}
           script: |
             # Navigate to project directory
             cd /root/projects/meetlines-users || mkdir -p /root/projects/meetlines-users && cd /root/projects/meetlines-users
             
             # Create .env file with secrets
             cat > .env << EOF
+            # Database Configuration
             DB_HOST=${{ secrets.DB_HOST }}
             DB_PORT=${{ secrets.DB_PORT }}
             DB_NAME=${{ secrets.DB_NAME }}
             DB_USERNAME=${{ secrets.DB_USERNAME }}
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            KEYCLOAK_ISSUER_URI=${{ secrets.KEYCLOAK_ISSUER_URI }}
-            KEYCLOAK_JWK_SET_URI=${{ secrets.KEYCLOAK_JWK_SET_URI }}
-            KEYCLOAK_CLIENT_ID=${{ secrets.KEYCLOAK_CLIENT_ID }}
-            KEYCLOAK_CLIENT_SECRET=${{ secrets.KEYCLOAK_CLIENT_SECRET }}
             EOF
             
             # Download docker-compose.prod.yml
