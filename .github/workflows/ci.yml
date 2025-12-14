@@ -16,15 +16,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Make mvnw executable
-        run: chmod +x mvnw
-
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
+
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v5
+        with:
+          maven-version: '3.9.6'
 
       - name: Cache Maven packages
         uses: actions/cache@v4
@@ -35,10 +37,10 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Build booking module
-        run: ./mvnw clean compile -pl booking -B
+        run: mvn clean compile -pl booking -B
 
       - name: Run booking tests
-        run: ./mvnw test -pl booking -B
+        run: mvn test -pl booking -B
 
       - name: Generate test report for booking
         if: always()
@@ -50,7 +52,7 @@ jobs:
           fail-on-error: false
 
       - name: Package booking application
-        run: ./mvnw package -DskipTests -pl booking -B
+        run: mvn package -DskipTests -pl booking -B
 
       - name: Upload booking JAR artifact
         uses: actions/upload-artifact@v4
@@ -60,7 +62,7 @@ jobs:
           retention-days: 7
 
       - name: Run code coverage for booking
-        run: ./mvnw verify -pl booking -B
+        run: mvn verify -pl booking -B
 
       - name: Upload coverage to Codecov (optional)
         if: github.event_name == 'push'
