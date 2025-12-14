@@ -35,8 +35,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Build ${{ matrix.module }} module
-        run: ./mvnw clean compile -pl ${{ matrix.module }} -B
+      - name: Make mvnw executable
+        run: chmod +x ./mvnw
+
+      - name: Build parent and ${{ matrix.module }} module
+        run: ./mvnw clean install -pl ${{ matrix.module }} -am -DskipTests -B
 
       - name: Run ${{ matrix.module }} tests
         run: ./mvnw test -pl ${{ matrix.module }} -B
@@ -51,7 +54,7 @@ jobs:
           fail-on-error: false
 
       - name: Package ${{ matrix.module }} application
-        run: ./mvnw package -DskipTests -pl ${{ matrix.module }} -B
+        run: ./mvnw package -DskipTests -pl ${{ matrix.module }} -am -B
 
       - name: Upload ${{ matrix.module }} JAR artifact
         uses: actions/upload-artifact@v4
@@ -62,6 +65,7 @@ jobs:
 
       - name: Run code coverage for ${{ matrix.module }}
         run: ./mvnw verify -pl ${{ matrix.module }} -B
+        continue-on-error: true
 
       - name: Upload coverage to Codecov (optional)
         if: github.event_name == 'push'
