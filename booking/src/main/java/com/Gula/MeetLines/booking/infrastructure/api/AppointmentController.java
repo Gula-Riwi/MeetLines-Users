@@ -20,9 +20,21 @@ import com.Gula.MeetLines.booking.infrastructure.api.dto.AppointmentResponse;
 import com.Gula.MeetLines.booking.infrastructure.api.dto.AvailableSlotsResponse;
 import com.Gula.MeetLines.booking.infrastructure.api.dto.ErrorResponse;
 import com.Gula.MeetLines.booking.infrastructure.api.dto.WorkingHoursResponse;
+import com.Gula.MeetLines.booking.domain.TimeSlot;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,8 +42,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-import com.Gula.MeetLines.booking.domain.TimeSlot;
-import org.springframework.format.annotation.DateTimeFormat;
 
 /**
  * REST Controller for appointment management.
@@ -74,6 +84,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 @RequestMapping("/api/v1/appointments")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Appointments", description = "Appointment booking and management operations")
+@SecurityRequirement(name = "bearerAuth")
 public class AppointmentController {
 
         private final BookAppointmentUseCase bookAppointmentUseCase;
@@ -139,6 +151,17 @@ public class AppointmentController {
          * @param request The booking request
          * @return ResponseEntity with the created appointment
          */
+        @Operation(
+                summary = "Book a new appointment",
+                description = "Creates a new appointment booking for a user with a specific service and employee"
+        )
+        @ApiResponses(value = {
+                @ApiResponse(responseCode = "201", description = "Appointment created successfully",
+                        content = @Content(schema = @Schema(implementation = AppointmentResponse.class))),
+                @ApiResponse(responseCode = "400", description = "Invalid request data"),
+                @ApiResponse(responseCode = "409", description = "Time slot or employee not available"),
+                @ApiResponse(responseCode = "401", description = "Not authenticated")
+        })
         @PostMapping
         public ResponseEntity<AppointmentResponse> bookAppointment(
                         @Valid @RequestBody BookAppointmentRequest request) {
@@ -177,8 +200,17 @@ public class AppointmentController {
          * @param id The appointment ID
          * @return The appointment details
          */
+        @Operation(
+                summary = "Get appointment by ID",
+                description = "Retrieves the details of a specific appointment"
+        )
+        @ApiResponses(value = {
+                @ApiResponse(responseCode = "200", description = "Appointment found"),
+                @ApiResponse(responseCode = "404", description = "Appointment not found")
+        })
         @GetMapping("/{id}")
-        public ResponseEntity<AppointmentResponse> getAppointment(@PathVariable Long id) {
+        public ResponseEntity<AppointmentResponse> getAppointment(
+                        @Parameter(description = "Appointment ID") @PathVariable Long id) {
                 Appointment appointment = getAppointmentUseCase.execute(id);
                 return ResponseEntity.ok(AppointmentResponse.from(appointment));
         }
@@ -190,9 +222,18 @@ public class AppointmentController {
          * @param request The cancellation request (reason)
          * @return The cancelled appointment details
          */
+        @Operation(
+                summary = "Cancel an appointment",
+                description = "Cancels an existing appointment with an optional reason"
+        )
+        @ApiResponses(value = {
+                @ApiResponse(responseCode = "200", description = "Appointment cancelled successfully"),
+                @ApiResponse(responseCode = "404", description = "Appointment not found"),
+                @ApiResponse(responseCode = "422", description = "Cannot cancel appointment (already completed or cancelled)")
+        })
         @DeleteMapping("/{id}")
         public ResponseEntity<AppointmentResponse> cancelAppointment(
-                        @PathVariable Long id,
+                        @Parameter(description = "Appointment ID") @PathVariable Long id,
                         @Valid @RequestBody(required = false) CancelAppointmentRequest request) {
 
                 String reason = (request != null) ? request.reason() : null;
@@ -221,11 +262,16 @@ public class AppointmentController {
          * @param status    Optional status
          * @return List of appointments
          */
+        @Operation(
+                summary = "List appointments",
+                description = "Lists appointments with optional filters by user, project, or status. Returns empty list if no filters provided."
+        )
+        @ApiResponse(responseCode = "200", description = "List of appointments returned")
         @GetMapping
         public ResponseEntity<List<AppointmentResponse>> listAppointments(
-                        @RequestParam(required = false) UUID userId,
-                        @RequestParam(required = false) UUID projectId,
-                        @RequestParam(required = false) AppointmentStatus status) {
+                        @Parameter(description = "Filter by user ID") @RequestParam(required = false) UUID userId,
+                        @Parameter(description = "Filter by project ID") @RequestParam(required = false) UUID projectId,
+                        @Parameter(description = "Filter by appointment status") @RequestParam(required = false) AppointmentStatus status) {
 
                 List<Appointment> appointments;
 
@@ -273,11 +319,16 @@ public class AppointmentController {
          * @param date       The date to check availability (format: yyyy-MM-dd)
          * @return List of available time slots for this employee
          */
+        @Operation(
+                summary = "Get employee available slots",
+                description = "Returns available time slots for a specific employee on a given date based on project schedule"
+        )
+        @ApiResponse(responseCode = "200", description = "Available time slots returned")
         @GetMapping("/employees/{employeeId}/available-slots")
         public ResponseEntity<AvailableSlotsResponse> getEmployeeAvailableSlots(
-                        @PathVariable UUID employeeId,
-                        @RequestParam UUID projectId,
-                        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+                        @Parameter(description = "Employee UUID") @PathVariable UUID employeeId,
+                        @Parameter(description = "Project UUID for schedule configuration") @RequestParam UUID projectId,
+                        @Parameter(description = "Date to check availability (yyyy-MM-dd)") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
 
                 log.info("Getting available slots for employee {} on date {}", employeeId, date);
 
@@ -324,10 +375,15 @@ public class AppointmentController {
          * @param date      The date to check (format: yyyy-MM-dd)
          * @return Working hours information
          */
+        @Operation(
+                summary = "Get project working hours",
+                description = "Returns business hours (opening/closing times) for a project on a specific date"
+        )
+        @ApiResponse(responseCode = "200", description = "Working hours information returned")
         @GetMapping("/projects/{projectId}/working-hours")
         public ResponseEntity<WorkingHoursResponse> getProjectWorkingHours(
-                        @PathVariable UUID projectId,
-                        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+                        @Parameter(description = "Project UUID") @PathVariable UUID projectId,
+                        @Parameter(description = "Date to check (yyyy-MM-dd)") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
 
                 log.info("Getting working hours for project {} on date {}", projectId, date);
 
