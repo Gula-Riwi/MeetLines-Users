@@ -11,7 +11,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-meetline}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env file}
-      SERVER_PORT: 8082
+      SERVER_PORT: ${SERVER_PORT:-9282}
     networks:
       - meetlines_network
     mem_limit: 768m
