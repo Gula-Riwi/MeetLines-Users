@@ -480,7 +480,7 @@ netstat -ano | findstr :8081
 taskkill /PID <PID> /F
 
 # Or change port in application.properties
-server.port=8082
+server.port=9282
 ```
 
 ## 🤝 Contributing
