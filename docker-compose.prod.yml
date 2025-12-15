@@ -6,7 +6,7 @@ services:
     container_name: meetlines-booking
     restart: unless-stopped
     ports:
-      - "8082:8082"
+      - "9282:9282"
     environment:
       # Database Configuration
       SPRING_DATASOURCE_URL: jdbc:postgresql://${DB_HOST}:${DB_PORT:-5432}/${DB_NAME}
@@ -18,7 +18,7 @@ services:
       
       # Spring Configuration
       SPRING_PROFILES_ACTIVE: prod
-      SERVER_PORT: 8082
+      SERVER_PORT: ${SERVER_PORT:-9282}
       
       # JVM Options
       JAVA_OPTS: "-Xmx512m -Xms256m"
@@ -27,7 +27,7 @@ services:
       - meetlines_network
     
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8082/actuator/health"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:${SERVER_PORT:-9282}/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3
