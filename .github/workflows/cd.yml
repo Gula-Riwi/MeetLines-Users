@@ -73,8 +73,10 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 32 }}
           script: |
-            # Navigate to project directory
-            cd /opt/meetlines-users || (sudo mkdir -p /opt/meetlines-users && sudo chown $USER:$USER /opt/meetlines-users && cd /opt/meetlines-users)
+            # Ensure directory exists with correct permissions
+            sudo mkdir -p /opt/meetlines-users
+            sudo chown -R $USER:$USER /opt/meetlines-users
+            cd /opt/meetlines-users
             
             # Create .env file with secrets
             cat > .env << EOF
