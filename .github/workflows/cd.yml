@@ -71,7 +71,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_PORT || 32 }}
+          port: ${{ secrets.VPS_PORT || 22 }}
           script: |
             # Navigate to project directory
             cd /opt/meetlines-users
@@ -101,25 +101,31 @@ jobs:
             # Start new containers
             docker compose up -d
             
+            # Wait a moment for container to start
+            sleep 5
+            
             # Show running containers
             echo "=== Running containers ==="
             docker ps
             
             # Show container logs
-            echo "=== Container logs (last 50 lines) ==="
-            docker compose logs --tail=50
+            echo "=== Booking container logs ==="
+            docker logs meetlines-booking 2>&1 || docker compose logs booking
             
             # Check if booking container is running
             if ! docker ps | grep -q booking; then
               echo "ERROR: Booking container is not running!"
-              echo "=== Full container logs ==="
-              docker compose logs
+              docker ps -a | grep booking
               exit 1
             fi
             
-            # Wait for services to initialize
-            echo "=== Waiting 30 seconds for service initialization ==="
-            sleep 30
+            # Wait for service to initialize
+            echo "=== Waiting 60 seconds for service initialization ==="
+            sleep 60
+            
+            # Show updated logs
+            echo "=== Latest logs after initialization ==="
+            docker logs meetlines-booking --tail=100 2>&1 || docker compose logs booking --tail=100
             
             # Clean up old images (older than 24h)
             docker image prune -af --filter "until=24h"
