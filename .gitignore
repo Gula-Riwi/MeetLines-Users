@@ -65,6 +65,7 @@ build/
 ### Project Directories ###
 Meetlines-Frontend/
 MeetLines-Wiki/
+MeetLines-Backend/
 
 docs/architecture.md
 docs/bots.md
