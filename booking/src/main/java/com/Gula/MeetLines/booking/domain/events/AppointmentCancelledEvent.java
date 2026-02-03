@@ -25,7 +25,7 @@ import java.util.UUID;
 @Getter
 public class AppointmentCancelledEvent {
 
-    private final Long appointmentId;
+    private final Integer appointmentId;
     private final UUID projectId;
     private final UUID userId;
     private final ZonedDateTime startTime;
@@ -34,7 +34,7 @@ public class AppointmentCancelledEvent {
     private final ZonedDateTime occurredOn;
 
     public AppointmentCancelledEvent(
-            Long appointmentId,
+            Integer appointmentId,
             UUID projectId,
             UUID userId,
             ZonedDateTime startTime,

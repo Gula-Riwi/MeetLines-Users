@@ -40,7 +40,7 @@ import java.util.UUID;
  * @param updatedAt       Last update timestamp
  */
 public record AppointmentResponse(
-        Long id,
+        Integer id,
         UUID projectId,
         UUID userId,
         Integer serviceId,

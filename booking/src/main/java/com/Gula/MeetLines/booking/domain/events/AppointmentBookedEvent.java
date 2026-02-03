@@ -79,7 +79,7 @@ public class AppointmentBookedEvent {
      * Unique identifier of the booked appointment.
      * Used to fetch full appointment details if needed.
      */
-    private final Long appointmentId;
+    private final Integer appointmentId;
 
     /**
      * Identifier of the project/business where the appointment was booked.
@@ -130,7 +130,7 @@ public class AppointmentBookedEvent {
      * @param occurredOn    When this event occurred
      */
     public AppointmentBookedEvent(
-            Long appointmentId,
+            Integer appointmentId,
             UUID projectId,
             UUID userId,
             ZonedDateTime startTime,
