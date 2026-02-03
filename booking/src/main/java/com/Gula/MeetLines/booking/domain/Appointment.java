@@ -1,11 +1,11 @@
 package com.Gula.MeetLines.booking.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.UUID;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 /**
  * Domain entity representing an appointment/booking in the system.
@@ -55,9 +55,9 @@ public class Appointment {
      * Unique identifier for the appointment.
      * In DDD, this could be a Value Object (AppointmentId), but for initial
      * simplicity
-     * we use Long. Can be refactored later.
+     * we use Integer. Can be refactored later.
      */
-    private Long id;
+    private Integer id;
 
     /**
      * Identifier of the project this appointment belongs to.

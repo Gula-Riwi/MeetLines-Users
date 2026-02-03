@@ -1,16 +1,26 @@
 package com.Gula.MeetLines.booking.infrastructure.persistence.entity;
 
+import java.math.BigDecimal;
+import java.time.ZonedDateTime;
+import java.util.UUID;
+
 import com.Gula.MeetLines.booking.domain.Appointment;
 import com.Gula.MeetLines.booking.domain.AppointmentStatus;
-import jakarta.persistence.*;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.math.BigDecimal;
-import java.time.ZonedDateTime;
-import java.util.UUID;
 
 /**
  * JPA Entity for persisting appointments to the database.
@@ -88,7 +98,7 @@ public class AppointmentEntity {
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     /**
      * Project/business identifier.
